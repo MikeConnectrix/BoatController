@@ -1,0 +1,55 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Boatcontroller Firmware Update</title>
+    <script src="jquery-1.11.3.min.js"></script>
+    <script src="jquery-ui.js"></script>
+    <link href="Boatcontroller.css" rel="stylesheet" />
+    <link href="Sidebar.css" rel="stylesheet" />
+</head>
+<body class="main" class="noselect" align="center" style="background-color:white">
+
+    <!-- Side navigation -->
+    <div class="sidenav">
+        <a href="index.html" target="_self">Control</a>
+        <a href="setup.html" target="_self">Setup</a>
+        <a href="upload.html" target="_self">Upload</a>
+        <a href="update.html" target="_self">Update</a>
+    </div>
+
+    <!-- Page content -->
+    <div class="main" id="main_content">
+        <h1 style="color: teal;text-align:center;">Boatcontroller Firmware Update</h1>
+
+
+        <section class="py-5 bg-white">
+            <div class="container">
+                <div class="row">
+                    <div class="col">
+                        <div class="card bg-light m-2" style="min-height: 15rem;">
+                            <div class="card-header">Update Device Firmware from file</div>
+                            <div class="card-body">
+                                <form method="POST" action="#" enctype="multipart/form-data" id="upload_form">
+                                    <input type="file" name="update" id="file" onchange="sub(this)" style="display:none">		<label id="file-input" for="file">Choose file...</label>
+                                    <div class="btn-group">
+                                        <button type="submit" value="Update">Update</button>
+                                    </div><br><br>
+                                    <div id="prg"></div><div id="prgbar"><div id="bar"></div></div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </div>
+
+    <script>function sub(obj) { var fileName = obj.value.split("\\"); document.getElementById("file-input").innerHTML = "   " + fileName[fileName.length - 1]; }; $("form").submit(function (e) { e.preventDefault(); var form = $("#upload_form")[0]; var data = new FormData(form); $.ajax({ url: "/update", type: "POST", data: data, contentType: false, processData: false, xhr: function () { var xhr = new window.XMLHttpRequest(); xhr.upload.addEventListener("progress", function (evt) { if (evt.lengthComputable) { var per = evt.loaded / evt.total; $("#prg").html("progress: " + Math.round(per * 100) + "%"); $("#bar").css("width", Math.round(per * 100) + "%"); } }, false); return xhr; }, success: function (d, s) { console.log("success!") }, error: function (a, b, c) { } }); });</script>
+    <script>
+        includeHTML();
+    </script>
+
+</body>
+</html>

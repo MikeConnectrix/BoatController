@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <TITLE>ESP32 Boat Controller</TITLE>
+   
+    <script src="jquery-1.11.3.min.js"></script>
+    <script src="jquery-ui.js"></script>
+    <script src="compass.js"></script>
+    <link href="Boatcontroller.css" rel="stylesheet" />
+    <link href="roundslider.css" rel="stylesheet" />
+    <link href="compass.css" rel="stylesheet" />
+    <link href="Sidebar.css" rel="stylesheet" />
+    <script src="roundslider.js"></script>
+</head>
+<body class="noselect" align="center" style="background-color:white" onload="javascript:DelayStartWebSocket()">
+    <!-- Side navigation -->
+    <div class="sidenav">
+        <a href="index.html" target="_self">Control</a>
+        <a href="setup.html" target="_self">Setup</a>
+        <a href="upload.html" target="_self">Upload</a>
+        <a href="update.html" target="_self">Update</a>
+    </div>
+    
+        <!-- Page content -->
+        <div class="main" id="main_content">
+            <h1 style="color: teal;text-align:center;">ESP32 Boat Controller</h1>
+            <h2 style="color: teal;text-align:center;" id="BoatName"></h2>
+
+            <table id="mainTable" style="width:400px;margin:auto;table-layout:fixed" CELLSPACING=10>
+                <tr>
+                    <td></td>
+                    <td class="button" ontouchstart='sendButtonInput("MoveCar","1")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows">&#8679;</span></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="button" ontouchstart='sendButtonInput("MoveCar","3")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows">&#8678;</span></td>
+                    <td class="button"></td>
+                    <td class="button" ontouchstart='sendButtonInput("MoveCar","4")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows">&#8680;</span></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td class="button" ontouchstart='sendButtonInput("MoveCar","2")' ontouchend='sendButtonInput("MoveCar","0")'><span class="arrows">&#8681;</span></td>
+                    <td></td>
+                </tr>
+                <tr />
+                <tr />
+                <tr />
+                <tr />
+                <tr />
+                <tr />
+                <tr>
+                    <td>
+                        <div class="types">
+                            <div class="container">
+                                <div class="control">
+                                    <div id="Bearing" onchange="sendSliderValue('Bearing')"></div>
+                                </div>
+                                <div class="slidecontainer">
+                                    <input type="range" min="0" max="270" value="135" class="slider" id="Speed" onchange="sendValue('Speed')">
+                                </div>
+                            </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="compass">
+                            <div class="arrow"></div>
+                            <div class="disc" id="compassDiscImg"></div>
+                        </div>
+
+                    </td>
+                </tr>
+
+            </table>
+
+            <script type="text/javascript">
+
+                var ws;
+
+                $(document).ready(function () {
+                    $("#Bearing").roundSlider({
+                        svgMode: true,
+                        value: 45,
+                        max: 100,
+                        sliderType: "min-range",
+                    });
+                    $("#slider-vertical").slider({
+                        orientation: "vertical",
+                        range: "min",
+                        min: 0,
+                        max: 180,
+                        value: 90,
+                        slide: function (event, ui) {
+                            $("#amount").val(ui.value);
+                        }
+                    });
+                });
+
+                function sendSliderValue(key) {
+                    var value = document.getElementById(key).innerText;
+                    var data = key + "," + value;
+                    ws.send(data);
+                }
+
+                function sendValue(key) {
+                    var value = document.getElementById(key).value;
+                    var data = key + "," + value;
+                    ws.send(data);
+                }
+
+                function DelayStartWebSocket() {
+                    SetBoatName();
+                    setTimeout(WebSocketBegin, 1000);
+                }
+
+                function SetBoatName() {
+                    document.title = "ESP32 Boat Controller - " + varBoatName;
+                    document.getElementById('BoatName').innerHTML = varBoatName;
+                }
+
+                function WebSocketBegin() {
+
+                    if ("WebSocket" in window) {
+                        // Let us open a web socket
+                        ws = new WebSocket("ws://" + location.hostname + "/HTTPInput");
+                        //ws = new WebSocket(
+                        //  "wss://fc94f91f5992989f83474cc8abf7329b-8001.husarnetusers.com"
+                        //);
+
+                        ws.onopen = function () {
+                            // Web Socket is connected
+                            alert("Connection is open...");
+                        };
+
+                        ws.onmessage = function (evt) {
+                            var myObj = JSON.parse(event.data);
+                            var keys = Object.keys(myObj);
+
+                            for (var i = 0; i < keys.length; i++) {
+                                var key = keys[i];
+                                if (keys[i] == "bearing") {
+                                    const compassDisc = document.getElementById('compassDiscImg');
+                                    compassDisc.style.transform = `rotate(${myObj[key]}deg)`;
+                                    compassDisc.style.webkitTransform = `rotate(${myObj[key]}deg)`;
+                                    compassDisc.style.MozTransform = `rotate(${myObj[key]}deg)`;
+                                }
+
+                            }
+
+                        };
+
+                        ws.onclose = function () {
+                            // websocket is closed.
+                            alert("Connection is closed...");
+                        };
+                    } else {
+                        // The browser doesn't support WebSocket
+                        alert("WebSocket NOT supported by your Browser!");
+                    }
+                }
+
+            </script>
+
+            <script>
+                var webSocketCarInputUrl = "ws:\/\/" + window.location.hostname + "/HTTPInput";
+                var websocketCarInput;
+                var varBoatName = 'Prinz Eugen';
+
+                function initCarInputWebSocket() {
+                    websocketCarInput = new WebSocket(webSocketCarInputUrl);
+                    websocketCarInput.onopen = function (event) {
+                        var speedButton = document.getElementById("Speed");
+                        sendButtonInput("Speed", speedButton.value);
+                    };
+                    websocketCarInput.onclose = function (event) { setTimeout(initCarInputWebSocket, 2000); };
+                    websocketCarInput.onmessage = function (event) { };
+                }
+
+                function sendButtonInput(key) {
+                    var data = key + "," + value;
+                    websocketCarInput.send(data);
+                }
+
+                //window.onload = initCarInputWebSocket;
+                document.getElementById("mainTable").addEventListener("touchend", function (event) {
+                    event.preventDefault()
+                });
+            </script>
+
+
+
+            <style>
+                h1 span {
+                    font-size: 0.6em;
+                }
+
+                .types {
+                    display: inline-block;
+                    padding: 10px 30px;
+                    border: 1px dotted;
+                    margin-right: 20px;
+                    overflow: hidden;
+                }
+
+                .container {
+                    height: 180px;
+                    width: 400px;
+                }
+
+                    .container > div {
+                        float: left;
+                    }
+
+                .control {
+                    margin-right: 70px;
+                }
+            </style>
+        </div>
+    
+
+</body>    
+</html>
