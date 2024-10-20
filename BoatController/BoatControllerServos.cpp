@@ -30,24 +30,32 @@ void BoatControllerServosClass::init()
 	
 	currentMillis = millis();
 
-	JsonArray Controllers = config["Controllers"];
-	Servos = config["Servos"];
+	JsonArray Controllers = config["Cont"];
+	Servos = config["Servo"];
 	
-	//Set up controller boards from config
-	for (JsonVariant value : Controllers) {
-		servoBoard[AttachedBoards] = Adafruit_PWMServoDriver(value["I2CAddress"].as<uint8_t>());
-		servoBoard[AttachedBoards].begin();
-		servoBoard[AttachedBoards].setPWMFreq(SERVO_FREQ); // Analog servos run at ~50 Hz updates
-		Serial.printf("Attached %s controller at address %d\n", value["description"].as<const char*>(), value["I2CAddress"].as<uint8_t>());
-		AttachedBoards++;
+	if (Controllers) {
+		// Set up controller boards from config
+		for (JsonVariant value : Controllers) {
+			servoBoard[AttachedBoards] = Adafruit_PWMServoDriver(value["I2C"].as<uint8_t>());
+			servoBoard[AttachedBoards].begin();
+			servoBoard[AttachedBoards].setPWMFreq(SERVO_FREQ); // Analog servos run at ~50 Hz updates
+			Serial.printf("Attached %s controller at address %d\n", value["dscn"].as<const char*>(), value["I2C"].as<uint8_t>());
+			AttachedBoards++;
+		}
 	}
-
-	//Initialise servos with default positions
-	for (JsonVariant value : Servos) {
-		value["target"].set(value["homePos"].as<int>());
-		value["current"].set(0);
-		value["millis"].set(currentMillis);
+	else
+		Serial.println("Error: No controller configurations found!");
+	
+	if (Servos) {
+		// Initialise servos with default positions
+		for (JsonVariant value : Servos) {
+			value["target"].set(value["homPos"].as<int>());
+			value["current"].set(0);
+			value["millis"].set(currentMillis);
+		}
 	}
+	else
+		Serial.println("Error: No servo configurations found!");
 }
 
 //this function deals with moving all the servos at the correct speed.
@@ -55,10 +63,13 @@ void servoControl() {
 	int sendPos;
 	for (JsonVariant value : Servos) {
 		if (value["target"].as<int>() != value["current"].as<int>()) {
-			if (currentMillis - value["millis"].as<int>() >= value["speed"].as<int>()) {
+			if (currentMillis - value["millis"].as<int>() >= value["spd"].as<int>()) {
+				//Serial.printf("Moving %s from %d to %d at speed %d\n", value["dscn"].as<String>(), value["current"].as<int>(), value["target"].as<int>(), value["spd"].as<int>());
 				value["millis"].set(currentMillis);
 				if (value["target"].as<int>() > value["max"].as<int>())
 					value["target"].set(value["max"].as<int>());
+				if (value["target"].as<int>() < value["min"].as<int>())
+					value["target"].set(value["min"].as<int>());
 				
 				int current = value["current"].as<int>();
 				
@@ -68,9 +79,17 @@ void servoControl() {
 				else
 					current--;
 				
-				sendPos = map(current, 0, value["max"].as<int>(), USMIN, USMAX);
-				servoBoard[value["Controller"].as<int>()].writeMicroseconds(value["Port"].as<int>(),sendPos);
-				value["current"].set(current);				
+				sendPos = map(current, value["min"].as<int>(), value["max"].as<int>(), USMIN, USMAX);
+				int ControllerID = value["Ctrl"].as<int>();
+				
+				//Error trap that controllers have successfully set up
+				if (AttachedBoards>0 && ControllerID <= AttachedBoards) {
+					servoBoard[ControllerID].writeMicroseconds(value["Prt"].as<int>(), sendPos);					
+				}
+				
+				value["current"].set(current);
+				if (value["type"].as<int>() == 3)
+					value["homPos"].set(current);
 				
 			}
 		}
@@ -82,7 +101,7 @@ void BoatControllerServosClass::doWork()
     if (!alreadyRunning) {
         alreadyRunning = true;
         currentMillis = millis();
-        servoControl();  //servo control function        
+        if (AttachedBoards>0) servoControl();  //servo control function        
         alreadyRunning = false;
     }	
 

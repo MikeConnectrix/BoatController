@@ -1,0 +1,114 @@
+{
+  "boatName": "Prinz Eugen",
+  "APMode": true,
+  "SlideShowDelay": 20,
+  "Compass": {
+    "Offset": 180,
+    "AxisBias": [
+      {
+        "bias": "MagMinX",
+        "value": 0
+      },
+      {
+        "bias": "MagMaxX",
+        "value": 0
+      },
+      {
+        "bias": "MagMinY",
+        "value": 0
+      },
+      {
+        "bias": "MagMaxY",
+        "value": 0
+      },
+      {
+        "bias": "MagMinZ",
+        "value": 0
+      },
+      {
+        "bias": "MagMaxZ",
+        "value": 0
+      }
+    ]
+  },
+  "Controllers": [
+    {
+      "I2CAddress": 96,
+      "description": "Built-in"
+    },
+    {
+      "I2CAddress": 64,
+      "description": "Rear Control Deck"
+    }
+  ],
+  "Servos": [
+    {
+      "Controller": 0,
+      "Port": 0,
+      "type": 1,
+      "description": "Throttle",
+      "min": 0,
+      "max": 180,
+      "speed": 5,
+      "homePos": 90,
+      "batteryPos": 90
+    },
+    {
+      "Controller": 1,
+      "Port": 1,
+      "type": 2,
+      "description": "Port Rudder",
+      "min": 0,
+      "max": 180,
+      "speed": 5,
+      "homePos": 90,
+      "batteryPos": 90
+    },
+    {
+      "Controller": 0,
+      "Port": 10,
+      "type": 3,
+      "setBearing": 360,
+      "description": "Forward Rangefinder",
+      "min": 0,
+      "max": 270,
+      "speed": 40,
+      "homePos": 135,
+      "batteryPos": 135
+    },
+    {
+      "Controller": 0,
+      "Port": 11,
+      "type": 4,
+      "parent": "Forward Rangefinder",
+      "description": "Anton Turret",
+      "min": 0,
+      "max": 180,
+      "speed": 50,
+      "homePos": 90,
+      "batteryPos": 90
+    },
+    {
+      "Controller": 0,
+      "Port": 12,
+      "type": 4,
+      "parent": "Forward Rangefinder",
+      "description": "Bruno Turret",
+      "min": 0,
+      "max": 180,
+      "speed": 50,
+      "homePos": 90,
+      "batteryPos": 90
+    },
+    {
+      "Controller": 0,
+      "Port": 1,
+      "type": 2,
+      "description": "Starboard Rudder",
+      "min": 0,
+      "max": 180,
+      "speed": 50,
+      "homePos": 90
+    }
+  ]
+  }

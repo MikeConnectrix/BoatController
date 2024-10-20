@@ -24,6 +24,9 @@ float MagMaxY;
 float MagMinZ;
 float MagMaxZ;
 float localOffset;
+bool backupConfig = false;
+unsigned long compCurrentMillis;
+unsigned long compCompassBackupMillis;
 
 void BoatControllerCompassClass::init()
 {
@@ -37,34 +40,13 @@ void BoatControllerCompassClass::init()
         Serial.println("Magnetometer initialised!");
 		
 		//Read config values from config file
-		localOffset = config["Compass"]["Offset"];
-		JsonArray axisBias = config["Compass"]["AxisBias"];
-		
-		//Read axis bias settings from config
-		for (JsonVariant value : axisBias) {
-			float newValue = value["value"].as<float>();
-			
-			//If the value is spurios reset it
-			if (abs(newValue) > 100)
-				newValue = 0;
-			if (value["bias"].as<String>().equals("MagMinX"))
-				MagMinX = newValue;
-				
-			if (value["bias"].as<String>().equals("MagMaxX"))
-				MagMaxX = newValue;
-				
-			if (value["bias"].as<String>().equals("MagMinY")) 
-				MagMinY = newValue;
-				
-			if (value["bias"].as<String>().equals("MagMaxY")) 
-				MagMaxY = newValue;
-				
-			if (value["bias"].as<String>().equals("MagMinZ")) 
-				MagMinZ = newValue;
-				
-			if (value["bias"].as<String>().equals("MagMaxZ")) 
-				MagMaxZ = newValue;				
-		}		
+		localOffset = config["Comp"]["Offset"];
+		MagMinX = config["Comp"]["MMinX"];
+		MagMaxX = config["Comp"]["MMaxX"];
+		MagMinY = config["Comp"]["MMinY"];
+		MagMaxY = config["Comp"]["MMaxY"];
+		MagMinZ = config["Comp"]["MMinZ"];
+		MagMaxZ = config["Comp"]["MMaxZ"];
 
 		Serial.printf("Compass bias read from config - MinX=%.0f MaxX=%.0f:MinY=%.0f MaxY=%.0f:MinZ=%.0f MaxZ=%.0f\n", MagMinX, MagMaxX, MagMinY, MagMaxY, MagMinZ, MagMaxZ);
     }
@@ -75,6 +57,7 @@ void BoatControllerCompassClass::doWork()
     /* Get a new sensor event */
     sensors_event_t event;
     mag.getEvent(&event);
+	compCurrentMillis = millis();
 
     bool updateCompassConfig = false;
     //Adjust compass calibration if necessary
@@ -107,25 +90,15 @@ void BoatControllerCompassClass::doWork()
 	if (updateCompassConfig) {
 		Serial.println("Updating Bias Values... ");
 
-		JsonArray axisBias = config["Compass"]["AxisBias"];		
-		for (int i = 0; i < axisBias.size(); i++) {
-			JsonVariant item = axisBias[i];
-			if (item["bias"].as<String>().equals("MagMinX"))
-				item["value"].set((int)MagMinX-1);
-			if (item["bias"].as<String>().equals("MagMaxX"))
-				item["value"].set((int)MagMaxX+1);
-			if (item["bias"].as<String>().equals("MagMinY"))
-				item["value"].set((int)MagMinY-1);
-			if (item["bias"].as<String>().equals("MagMaxY"))
-				item["value"].set((int)MagMaxY+1);
-			if (item["bias"].as<String>().equals("MagMinZ"))
-				item["value"].set((int)MagMinZ-1);
-			if (item["bias"].as<String>().equals("MagMaxZ"))
-				item["value"].set((int)MagMaxZ+1);	
-		}	
-		
-		bContConfig.saveConfig();
+		config["Comp"]["MMinX"].set((int)MagMinX - 1);
+		config["Comp"]["MMaxX"].set((int)MagMaxX + 1);
+		config["Comp"]["MMinY"].set((int)MagMinY - 1);
+		config["Comp"]["MMaxY"].set((int)MagMaxY + 1);
+		config["Comp"]["MMinZ"].set((int)MagMinZ - 1);
+		config["Comp"]["MMaxZ"].set((int)MagMaxZ + 1);
 
+		compCompassBackupMillis = compCurrentMillis;
+		backupConfig = true;
 	}
 
 	//Calibrate reading with bias values
@@ -145,20 +118,28 @@ void BoatControllerCompassClass::doWork()
     //Filter the compass sensitivity, If its less than 2 degrees, the servos will not move anyway
     if (abs(CompassHeading - newCompassHeading) > 2) {
 		CompassHeading = newCompassHeading;
-		Serial.printf("Compass Heading: %.0f\n", CompassHeading);
 		
 		//Adjust any compass based servos
 		for (JsonVariant value : Servos) {
 			if (value["type"].as<int>()==3) {
-				int delta = 360-CompassHeading;
+				
+				int delta = value["homPos"].as<int>() - CompassHeading;
 				if (delta > 180)
 					delta = -1*CompassHeading;
-				value["target"].set(value["homePos"].as<int>() -delta);
-
+				int newTargetPos = value["homPos"].as<int>() - delta;
+				if (newTargetPos < value["min"].as<int>() || newTargetPos > value["max"].as<int>())
+					newTargetPos = value["batPos"].as<int>();
+				value["target"].set(newTargetPos);				
+				
+				Serial.printf("RF Movement: Compass=%.0f Target:%.0f NewTarget:%d\n", newCompassHeading, value["target"].as<float>(), newTargetPos);
+				
 				//Adjust any child servos attached to the Rangefinder type
 				for (JsonVariant children : Servos) {
-					if (children["parent"].as<String>() == value["description"].as<String>()) {
-						children["target"].set(children["homePos"].as<int>() - delta);						
+					if (children["parent"].as<int>() == value["ID"].as<int>()) {
+						int TargetPos = newTargetPos - delta;
+						if (TargetPos < children["min"].as<int>() || TargetPos > children["max"].as<int>())
+							TargetPos = children["batPos"].as<int>();
+						children["target"].set(TargetPos);						
 					}
 				}	
 			}
@@ -168,6 +149,12 @@ void BoatControllerCompassClass::doWork()
 		char output[50];
         sprintf(output,"{\"sensor\":\"compassDiscImg\",\"bearing\":%.0f}", CompassHeading);
 		bContWifi.sendSocketMessage(output);   
+
+		//Backup the config if changes have been made to compass bias
+		if (backupConfig && (compCurrentMillis > compCompassBackupMillis + 60000)) {
+			bContConfig.saveConfig();
+			backupConfig = false;			
+		}
 
     }   
     

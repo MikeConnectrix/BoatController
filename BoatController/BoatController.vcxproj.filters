@@ -29,6 +29,17 @@
     <None Include="data\upload.html" />
     <None Include="data\setup.css" />
     <None Include="data\doubleslider.js" />
+    <None Include="data\config.bak" />
+    <None Include="data\joy.js" />
+    <None Include="data\parameters.html" />
+    <None Include="data\compass.html" />
+    <None Include="data\servos.html" />
+    <None Include="data\controllers.html" />
+    <None Include="data\index.js" />
+    <None Include="data\index.css" />
+    <None Include="..\..\..\..\AppData\Local\Temp\VMBuilds\BoatController\esp32_esp32\Debug\BoatController.ino.bin">
+      <Filter>Misc Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BoatController.ino" />
@@ -51,6 +62,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BoatControllerConfig.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BoatControllerIBus.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BoatControllerPWM.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -80,6 +97,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BoatControllerConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BoatControllerIBus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BoatControllerPWM.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

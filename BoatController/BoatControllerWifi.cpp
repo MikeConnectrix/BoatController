@@ -7,12 +7,14 @@
 #include "BoatControllerDefines.h"
 #include <Update.h>
 #include <ArduinoJson.h>
+#include "BoatControllerConfig.h"
 
+extern BoatControllerConfigClass bContConfig;
 extern DynamicJsonDocument config;
 extern JsonArray Servos;
+extern String firmwareUpdateFile;
 
-const char* ssid = "BoatController";
-const char* password = "12345678";
+
 const char header_html[] PROGMEM = "<!DOCTYPE html><html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8'/><meta name='viewport' content='width=device-width, initial-scale=1, minimum-scale=1.0, shrink-to-fit=no'><title>GreenPonik.com - WebView</title></head><body>";
 const char footer_html[] PROGMEM = "</body></html>";
 const char update_html[] PROGMEM = "<h1>Only .bin file</h1><form method='POST' action='/updt' enctype='multipart/form-data'><input type='file' name='update' required><input type='submit' value='Run Update'></form>";
@@ -20,8 +22,11 @@ const char update_html[] PROGMEM = "<h1>Only .bin file</h1><form method='POST' a
 
 bool filereading = false;
 bool espShouldReboot = false;
+String postData = "";
+String updateHost = "";
+String updatePath = "";
 
-AsyncWebServer *server;
+AsyncWebServer* server;
 AsyncWebSocket wsHTTPInput("/HTTPInput");
 
 // handles uploads to the filserver
@@ -208,10 +213,36 @@ void notFound(AsyncWebServerRequest* request) {
 void BoatControllerWififClass::init() {
 	
 	listDir(FFat, "/");
+	IPAddress IP;
+	String staMode = config["Params"]["STAMode"].as<String>();
+	staMode.toLowerCase();
+	if (staMode.equals("true"))
+		Serial.println("Station Mode");
+	else
+		Serial.println("AP Mode");
 
-	WiFi.softAP(ssid, password);
-	IPAddress IP = WiFi.softAPIP();
-	Serial.print("AP IP address: ");
+	if (staMode.equals("true")) {
+		WiFi.mode(WIFI_STA);
+		WiFi.begin(config["Params"]["STAName"].as<String>().c_str(), config["Params"]["STAPwd"].as<String>().c_str());
+		Serial.print("Connecting to WiFi ..");
+		int retries=0;
+		while (WiFi.status() != WL_CONNECTED && retries<10) {
+			retries++;
+			Serial.print('.');
+			delay(1000);
+		}
+		IP = WiFi.localIP();
+		Serial.println(WiFi.localIP());
+	}
+	
+	if (!WiFi.isConnected()) {
+		WiFi.mode(WIFI_AP);
+		WiFi.softAP(config["Params"]["APName"].as<String>().c_str(), config["Params"]["APPass"].as<String>().c_str());
+		Serial.print("Using AP Mode ..");
+		IP = WiFi.softAPIP();
+	}
+	
+	Serial.print("IP address: ");
 	Serial.println(IP);
 	server = new AsyncWebServer(80);
 	
@@ -221,7 +252,7 @@ void BoatControllerWififClass::init() {
 	
 	// run handleUpload function when any file is uploaded
 	server->on("/upload", HTTP_POST, [](AsyncWebServerRequest* request) { request->send(200); }, handleUpload);
-
+	
 	server->on("/update", HTTP_POST, [](AsyncWebServerRequest* request) {
   		espShouldReboot = !Update.hasError();
   		AsyncWebServerResponse *response = request->beginResponse(200, "text/html", espShouldReboot ? "<h1><strong>Update DONE</strong></h1><br><a href='/'>Return Home</a>" : "<h1><strong>Update FAILED</strong></h1><br><a href='/updt'>Retry?</a>");
@@ -260,6 +291,61 @@ void BoatControllerWififClass::init() {
 		Serial.println(logmessage);
 		request->send(200, "text/plain", listFiles(true));
 	});
+	
+	server->on("/ConfigSection", HTTP_GET, [](AsyncWebServerRequest* request) {
+		const char* param = request->getParam("Section")->value().c_str();
+		String logmessage = "Client:" + request->client()->remoteIP().toString() + " " + request->url();
+		String body;
+		serializeJson(config[param],body);
+		request->send(200, "text/json", body);
+	});
+	
+	server->onRequestBody([](AsyncWebServerRequest* request, uint8_t* data, size_t len, size_t index, size_t total) {
+			if ((request->url() == "/SaveConfigSection") &&	(request->method() == HTTP_POST)) {
+			
+				Serial.printf("len = %d index = %d total = %d\n", len, index, total);
+				if (index == 0)
+					postData = "";
+
+				for (int i = 0; i < len;i++) {
+					postData += (char)data[i];
+				}
+
+				if (len + index == total) {
+					Serial.println("Data: ");
+					Serial.println(postData);
+					Serial.println("Length: ");
+					Serial.println(request->contentLength());
+
+					StaticJsonDocument<4096> doc;
+					DeserializationError error = deserializeJson(doc, postData);
+					if (error) {
+						request->send(400, "text/plain", "Fehlerhafte JSON Struktur");
+						doc.clear();
+					}
+					else {
+						const char* param = request->getParam("Section")->value().c_str();
+						JsonObject obj = doc.as<JsonObject>();
+						if (!obj)
+						{
+							JsonArray arr = doc.as<JsonArray>();
+							config[param].set(arr);						
+						}
+						else
+							config[param].set(obj);						
+
+						
+						bContConfig.saveConfig();
+						request->send(200, "application/json", "{ \"status\": 0 }");
+					}
+				
+				}
+				
+			}		
+			
+		});
+
+	server->on("/reboot", HTTP_GET, [](AsyncWebServerRequest* request) { ESP.restart(); });
 
 	server->on("/file", HTTP_GET, [](AsyncWebServerRequest* request) {
 		String logmessage = "Client:" + request->client()->remoteIP().toString() + " " + request->url();

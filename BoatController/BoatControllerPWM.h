@@ -1,16 +1,14 @@
-// BoatControllerSBUS.h
+// BoatControllerPWM.h
 
-#ifndef _BOATCONTROLLERSBUS_h
-#define _BOATCONTROLLERSBUS_h
+#ifndef _BOATCONTROLLERPWM_h
+#define _BOATCONTROLLERPWM_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "arduino.h"
 #else
 	#include "WProgram.h"
 #endif
-
-class BoatControllerSBUSClass
-{
+class BoatControllerPWMClass {
 protected:
 public:
 	void init();

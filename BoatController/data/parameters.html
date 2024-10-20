@@ -1,0 +1,46 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+</head>
+<body class="noselect" align="center" style="background-color:white">
+    <div>
+        <form id="frmParameters" name="frmParameters">
+            <fieldset>
+                <h3>Boat Details</h3>
+                <label for="boatName">Boat Name:</label>
+                <input type="text" id="boat" name="boat"><br /><br />
+                <label for="RCType">RC Receiver Type:</label>
+                <select id="RCType" name="RCType"><option value="1">PWM</option><option value="2">SBus</option><option value="3">IBus</option></select><br /><br />
+            </fieldset>
+            <fieldset>
+                <h3>WIFI Details</h3>
+                <label for="STAMode">WIFI Mode:</label>
+                <label for="STAMode1">Station</label>
+                <input type="radio" id="STAMode1" name="STAMode" value="true">
+                <label for="STAMode2">Access Point</label>
+                <input type="radio" id="STAMode2" name="STAMode" value="False"><br /><br />
+                <label for="STAName">WIFI Name:</label>
+                <input type="text" id="STAName" name="STAName"><br /><br />
+                <label for="STAPwd">WIFI Password:</label>
+                <input type="password" id="STAPwd" name="STAPwd"><br /><br />
+                <label for="APName">AP Name:</label>
+                <input type="text" id="APName" name="APName"><br /><br />
+                <label for="APPwd">AP Password:</label>
+                <input type="password" id="APPwd" name="APPwd"><br /><br />
+
+            </fieldset>
+            <fieldset>
+                <h3>TFT adjustments</h3>
+                <label for="SShowDel">Slideshow Delay Time:</label>
+                <input type="number" id="SShowDel" name="SShowDel"><br /><br /><br />
+            </fieldset>
+            <input value="Save Changes" type="submit" onclick="saveParameters('frmParameters','Params')">
+        </form>
+    </div>
+    <style>
+
+    </style>
+</body>
+</html>

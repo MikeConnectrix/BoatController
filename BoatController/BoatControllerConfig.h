@@ -16,6 +16,8 @@ public:
 	void init();
 	void readConfig();
 	void saveConfig();
+	void saveConfigToFile(String fileName);
+	void backupConfig();
 	JsonVariant getElement(String ElementName);
 
 private:

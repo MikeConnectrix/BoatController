@@ -1,109 +1,86 @@
 {
-  "boatName": "Prinz Eugen",
-  "APMode": true,
-  "SlideShowDelay": 20,
-  "Compass": {
-    "Offset": 180,
-    "AxisBias": [
-      {
-        "bias": "MagMinX",
-        "value": 0
-      },
-      {
-        "bias": "MagMaxX",
-        "value": 0
-      },
-      {
-        "bias": "MagMinY",
-        "value": 0
-      },
-      {
-        "bias": "MagMaxY",
-        "value": 0
-      },
-      {
-        "bias": "MagMinZ",
-        "value": 0
-      },
-      {
-        "bias": "MagMaxZ",
-        "value": 0
-      }
-    ]
-  },
-  "Controllers": [
-    {
-      "I2CAddress": 96,
-      "description": "Built-in"
-    },
-    {
-      "I2CAddress": 64,
-      "description": "Rear Control Deck"
-    }
-  ],
-  "Servos": [
-    {
-      "Controller": 0,
-      "Port": 0,
-      "type": 1,
-      "description": "Throttle",
-      "min": 0,
-      "max": 180,
-      "speed": 5,
-      "homePos": 90
-    },
-    {
-      "Controller": 1,
-      "Port": 1,
-      "type": 2,
-      "description": "Port Rudder",
-      "min": 0,
-      "max": 180,
-      "speed": 5,
-      "homePos": 90
-    },
-    {
-      "Controller": 0,
-      "Port": 10,
-      "type": 3,
-      "setBearing": 360,
-      "description": "Forward Rangefinder",
-      "min": 0,
-      "max": 270,
-      "speed": 40,
-      "homePos": 135
-    },
-    {
-      "Controller": 0,
-      "Port": 11,
-      "type": 4,
-      "parent": "Forward Rangefinder",
-      "description": "Anton Turret",
-      "min": 0,
-      "max": 180,
-      "speed": 50,
-      "homePos": 90
-    },
-    {
-      "Controller": 0,
-      "Port": 12,
-      "type": 4,
-      "parent": "Forward Rangefinder",
-      "description": "Bruno Turret",
-      "min": 0,
-      "max": 180,
-      "speed": 50,
-      "homePos": 90
-    },
-    {
-      "Controller": 0,
-      "Port": 1,
-      "type": 2,
-      "description": "Starboard Rudder",
-      "min": 0,
-      "max": 180,
-      "speed": 50,
-      "homePos": 90
-    }
-  ]
-  }
+	"Params": {
+		"boat": "Prinz Eugen",
+		"RCType": "1",
+		"STAMode": "true",
+		"STAName": "Connectrix",
+		"STAPwd": "Mungus123",
+		"APName": "Prinz Eugen",
+		"APPwd": "12345678",
+		"SShowDel": "20"
+	},
+	"Comp": {
+		"Offset": 0,
+		"MMinX": -47,
+		"MMaxX": 50,
+		"MMinY": -27,
+		"MMaxY": 9,
+		"MMinZ": -81,
+		"MMaxZ": 9
+	},
+	"Cont": [
+		{
+			"ID": 0,
+			"I2C": 96,
+			"dscn": "Built-in"
+		},
+		{
+			"ID": 1,
+			"I2C": 64,
+			"dscn": "Forward Control Deck"
+		}
+	],
+	"Servo": [
+		{
+			"dscn": "Throttle",
+			"Ctrl": "0",
+			"type": 1,
+			"Prt": "0",
+			"RC": "0",
+			"parent": "",
+			"min": "0",
+			"max": "180",
+			"spd": "2",
+			"homPos": "90",
+			"batPos": "90",
+			"ID": "0",
+			"target": 108,
+			"current": 108,
+			"millis": 679559
+		},
+		{
+			"dscn": "Rudder",
+			"Ctrl": "0",
+			"type": 2,
+			"Prt": "1",
+			"RC": "1",
+			"parent": "",
+			"min": "0",
+			"max": "180",
+			"spd": "2",
+			"homPos": "90",
+			"batPos": "90",
+			"ID": "1",
+			"target": 108,
+			"current": 108,
+			"millis": 680289
+		},
+		{
+			"dscn": "Rear RF",
+			"Ctrl": "0",
+			"type": 3,
+			"Prt": "10",
+			"RC": "2",
+			"parent": "",
+			"min": "0",
+			"max": "180",
+			"spd": "5",
+			"homPos": -64885,
+			"batPos": "90",
+			"ID": "2",
+			"target": -64912,
+			"current": -64885,
+			"millis": 704650
+		}
+	]
+}

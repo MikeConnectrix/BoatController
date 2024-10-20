@@ -24,6 +24,12 @@
 #define SBUSRX 14
 #define SBUSTX 34
 
+#define PWMPin1 14
+#define PWMPin2 35
+#define PWMPin3 32
+#define PWMPin4 33
+
+
 #define LED_1 27
 #define LED_2 12
 

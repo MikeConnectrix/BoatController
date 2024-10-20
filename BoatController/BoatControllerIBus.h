@@ -1,7 +1,7 @@
-// BoatControllerSBUS.h
+// BoatControllerIBus.h
 
-#ifndef _BOATCONTROLLERSBUS_h
-#define _BOATCONTROLLERSBUS_h
+#ifndef _BOATCONTROLLERIBUS_h
+#define _BOATCONTROLLERIBUS_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "arduino.h"
@@ -9,8 +9,7 @@
 	#include "WProgram.h"
 #endif
 
-class BoatControllerSBUSClass
-{
+class BoatControllerIBUSClass {
 protected:
 public:
 	void init();

@@ -3,6 +3,8 @@ function openNav() {
         .style.width = "300px";
     document.getElementById("contentArea")
         .style.marginLeft = "300px";
+    document.getElementById("myHamburger")
+        .style.width = "0px";
 }
 
 function closeNav() {
@@ -10,6 +12,8 @@ function closeNav() {
         .style.width = "0";
     document.getElementById("contentArea")
         .style.marginLeft = "0";
+    document.getElementById("myHamburger")
+        .style.width = "100px";
 }
 
 function showContent(content) {
@@ -17,4 +21,14 @@ function showContent(content) {
         .textContent = content + " page";
 
     closeNav();
+}
+
+function openNav() {
+    document.getElementById("myNav").style.width = "10%";
+    document.getElementById("myHamburger").style.width = "0px";
+}
+
+function closeNav() {
+    document.getElementById("myNav").style.width = "0%";
+    document.getElementById("myHamburger").style.width = "50px";
 }
