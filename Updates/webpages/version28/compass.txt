@@ -1,0 +1,46 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+</head>
+<body class="noselect" align="center" style="background-color:white">
+    <form id="frmCompass" name="frmCompass">
+        <fieldset>
+            <h3>Compass Orientation</h3>
+            <label for="Offset">Reading Offset:</label>
+            <input class="magEntry"  type="number" id="Offset" name="Offset" size="10" maxlength="3"><br /><br />
+        </fieldset>
+        <fieldset>
+            <h3>Vector adjustments</h3>
+            <fieldset>
+                <label for="MMinX">X - Minimum:</label>
+                <input class="magEntry" type="number" id="MMinX" name="MMinX" size="10" maxlength="3">
+                <label for="MMaxX">Maximum:</label>
+                <input  class="magEntry" type="number" id="MMaxX" name="MMaxX" size="10" maxlength="3">
+            </fieldset>
+            <fieldset>
+                <label for="MMinY">Y - Minimum:</label>
+                <input  class="magEntry" type="number" id="MMinY" name="MMinY" size="10" maxlength="3">
+                <label for="MMaxY">Maximum:</label>
+                <input  class="magEntry" type="number" id="MMaxY" name="MMaxY" size="10" maxlength="3"><br />
+            </fieldset>
+            <fieldset>
+                <label for="MMinZ">Z - Minimum:</label>
+                <input  class="magEntry" type="number" id="MMinZ" name="MMinZ" size="10" maxlength="3">
+                <label for="MMaxZ">Maximum:</label>
+                <input  class="magEntry" type="number" id="MMaxZ" name="MMaxZ" size="10" maxlength="3"><br /><br />
+            </fieldset>
+            </fieldset>
+            <input value="Reset Compass" type="submit" onclick="resetCompass()">
+            <input value="Save Changes" type="submit" onclick="saveParameters('frmCompass','Comp')">
+</form>
+<style>
+    .magEntry{
+        width:80px;
+        text-align:center;
+    }
+</style>
+</body>
+
+</html>
