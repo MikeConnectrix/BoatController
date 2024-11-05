@@ -1,9 +1,7 @@
 {
   "Source": "version28",
   "Files": [
-    "Boatcontroller.css",
-    "compass.css",
-    "compass.html",
-    "compass.js"
+    "Boatcontroller.txt",
+    "compass.txt"
   ]
 }
