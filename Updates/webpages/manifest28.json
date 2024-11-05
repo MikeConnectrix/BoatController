@@ -1,10 +1,6 @@
 {
   "Files":[
-    "index.html",
-    "setup.html",
-    "setup.css",
-    "index.css",
-    "upload.html",
-    "upload.css"    
+    "version28/index.html",
+    "version28/setup.html"
   ]
 }
