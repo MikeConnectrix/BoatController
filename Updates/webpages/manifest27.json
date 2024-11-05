@@ -1,7 +1,30 @@
 {
   "Source": "webpages/version28",
   "Files": [
-    "Boatcontroller.txt",
-    "compass.txt"
+    "Boatcontroller.css",
+    "compass.css",
+    "compass.html",
+    "compass.js",
+    "controllers.html",
+    "doubleslider.js",
+    "favicon.ico",
+    "index.css",
+    "index.html",
+    "index.js",
+    "joy.js",
+    "jquery-1.11.3.min.js",
+    "jquery-ui.js",
+    "jquery-1.11.3.min.js",
+    "parameters.html",
+    "roundslider.css",
+    "roundslider.js",
+    "servos.html",
+    "setup.css",
+    "Setup.html",
+    "setup.js",
+    "Sidebar.css",
+    "Sidebar.js",
+    "update.html",
+    "upload.html"
   ]
 }
