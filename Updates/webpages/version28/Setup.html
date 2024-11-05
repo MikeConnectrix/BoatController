@@ -1,0 +1,85 @@
+<HTML>
+<HEAD>
+    <META NAME="GENERATOR" Content="Microsoft Visual Studio">
+    <TITLE>Boatcontroller Setup</TITLE>
+    <script language="JavaScript" type="text/javascript" src="jquery-1.11.3.min.js"></script>
+    <script language="JavaScript" type="text/javascript" src="jquery-ui.js"></script>
+    <script language="JavaScript" type="text/javascript" src="setup.js"></script>
+    <script src="Sidebar.js"></script>
+    <link href="boatcontroller.css" rel="stylesheet" />
+    <link href="Sidebar.css" rel="stylesheet" />
+    <link href="setup.css" rel="stylesheet" />
+    <script>
+        document
+            .addEventListener("DOMContentLoaded",
+                function () {
+                    SetFormDetails();
+                });
+    </script>
+</HEAD>
+<BODY class="noselect" align="center" style="background-color:white">
+    <!-- Side navigation -->
+    <div id="myNav" class="overlay">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div class="overlay-content">
+            <a href="index.html" target="_self">Control</a>
+            <a href="setup.html" target="_self">Setup</a>
+        </div>
+    </div>
+
+    <span id="myHamburger" style="font-size:30px;cursor:pointer" onclick="openNav()" class="hamburger">&#9776;</span>
+
+    <!-- Page content -->
+    <div class="main" id="main_content">
+        <h1 style="color: teal;text-align:center;">ESP32 Boat Controller</h1>
+
+        <div class="tab">
+            <button class="tablinks" onclick="openSection(event, 'Params',true)" id="defaultOpen">Parameters</button>
+            <button class="tablinks" onclick="openSection(event, 'Comp',true)">Compass</button>
+            <button class="tablinks" onclick="openSection(event, 'Cont',true)">Servo Controllers</button>
+            <button class="tablinks" onclick="openSection(event, 'SType',true)">Servo Types</button>
+            <button class="tablinks" onclick="openSection(event, 'Servo',true)">Servos</button>
+            <button class="tablinks" onclick="openSection(event, 'Upload',false)">File Manager</button>
+            <button class="tablinks" onclick="openSection(event, 'Update',false)">Firmware Update</button>
+        </div>
+
+        <div id="Params" class="tabcontent">
+            <div id="parametersContent"></div>
+        </div>
+
+        <div id="Cont" class="tabcontent">
+            <div id="controllersContent"></div>
+        </div>
+
+        <div id="Comp" class="tabcontent">
+            <div id="compassContent"></div>
+        </div>
+
+        <div id="Upload" class="tabcontent">
+            <div id="uploadContent"></div>
+        </div>
+
+        <div id="Update" class="tabcontent">
+            <div id="updateContent"></div>
+        </div>
+
+        <div id="Servo" class="tabcontent">
+            <div id="servosContent">
+            </div>
+        </div>
+        <div id="SType" class="tabcontent">
+            <div id="STypeContent">
+            </div>
+        </div>
+
+    </div>
+    <style>
+        td.selBox,th.selBox {
+            width: 500px;
+            text-align: center;
+        }
+    </style>
+</BODY>
+   
+
+</HTML >
