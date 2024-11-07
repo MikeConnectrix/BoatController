@@ -15,6 +15,9 @@ public:
 	void init();
 	void doWork();
 	void sendSocketMessage(String msg);
+	IPAddress IP;
+	String ControllerIPAddress = "";
+
 private:
 
 };

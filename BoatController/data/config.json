@@ -1,86 +1,63 @@
 {
-	"Params": {
-		"boat": "Prinz Eugen",
-		"RCType": "1",
-		"STAMode": "true",
-		"STAName": "Connectrix",
-		"STAPwd": "Mungus123",
-		"APName": "Prinz Eugen",
-		"APPwd": "12345678",
-		"SShowDel": "20"
-	},
-	"Comp": {
-		"Offset": 0,
-		"MMinX": -47,
-		"MMaxX": 50,
-		"MMinY": -27,
-		"MMaxY": 9,
-		"MMinZ": -81,
-		"MMaxZ": 9
-	},
-	"Cont": [
-		{
-			"ID": 0,
-			"I2C": 96,
-			"dscn": "Built-in"
-		},
-		{
-			"ID": 1,
-			"I2C": 64,
-			"dscn": "Forward Control Deck"
-		}
-	],
-	"Servo": [
-		{
-			"dscn": "Throttle",
-			"Ctrl": "0",
-			"type": 1,
-			"Prt": "0",
-			"RC": "0",
-			"parent": "",
-			"min": "0",
-			"max": "180",
-			"spd": "2",
-			"homPos": "90",
-			"batPos": "90",
-			"ID": "0",
-			"target": 108,
-			"current": 108,
-			"millis": 679559
-		},
-		{
-			"dscn": "Rudder",
-			"Ctrl": "0",
-			"type": 2,
-			"Prt": "1",
-			"RC": "1",
-			"parent": "",
-			"min": "0",
-			"max": "180",
-			"spd": "2",
-			"homPos": "90",
-			"batPos": "90",
-			"ID": "1",
-			"target": 108,
-			"current": 108,
-			"millis": 680289
-		},
-		{
-			"dscn": "Rear RF",
-			"Ctrl": "0",
-			"type": 3,
-			"Prt": "10",
-			"RC": "2",
-			"parent": "",
-			"min": "0",
-			"max": "180",
-			"spd": "5",
-			"homPos": -64885,
-			"batPos": "90",
-			"ID": "2",
-			"target": -64912,
-			"current": -64885,
-			"millis": 704650
-		}
-	]
+  "Params": {
+    "boat": "Prinz Eugen",
+    "RCType": "3",
+    "STAMode": "true",
+    "STAName": "Connectrix",
+    "STAPwd": "Mungus123",
+    "APName": "Prinz Eugen",
+    "APPwd": "12345678",
+    "SShowDel": "50"
+  },
+  "Comp": {
+    "Offset": 0,
+    "MMinX": -93,
+    "MMaxX": 54,
+    "MMinY": -35,
+    "MMaxY": 74,
+    "MMinZ": -89,
+    "MMaxZ": 59
+  },
+  "Cont": [
+    {
+      "dscn": "Built-in",
+      "I2C": "96",
+      "ID": "0"
+    },
+    {
+      "dscn": "Forward Control Deck",
+      "I2C": "64",
+      "ID": "1"
+    }
+  ],
+  "SType": [
+    {
+      "dscn": "180 Degree Servo",
+      "min": "0",
+      "max": "180",
+      "spd": "5",
+      "homPos": "90",
+      "batPos": "90",
+      "ID": "0"
+    },
+    {
+      "dscn": "270 Degree Servo",
+      "min": "0",
+      "max": "270",
+      "spd": "5",
+      "homPos": "135",
+      "batPos": "135",
+      "ID": "1"
+    },
+    {
+      "dscn": "Servo Switch",
+      "min": "-100",
+      "max": "100",
+      "spd": "0",
+      "homPos": "0",
+      "batPos": "0",
+      "ID": "2"
+    }
+  ],
+  "Servo": []
 }

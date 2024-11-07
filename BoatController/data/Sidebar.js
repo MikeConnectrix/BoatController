@@ -1,8 +1,8 @@
 function openNav() {
     document.getElementById("sideMenu")
-        .style.width = "300px";
+        .style.width = "50%";
     document.getElementById("contentArea")
-        .style.marginLeft = "300px";
+        .style.marginLeft = "50%";
     document.getElementById("myHamburger")
         .style.width = "0px";
 }

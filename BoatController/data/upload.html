@@ -19,6 +19,7 @@
         <fieldset>
             <button onclick="listFilesButton()">List Files</button>
             <button onclick="showUploadButtonFancy()">Upload File</button>
+            <button onclick="UpdateWebPages()">Update Web Pages</button>
             <button onclick="RebootController()">Reboot Controller</button>
         </fieldset>
         
@@ -51,14 +52,24 @@
                     window.open(urltocall, "_blank");
                 }
             }
-            function RebootController(){
+            function UpdateWebPages(){
+                var urltocall = "/updateweb";
+                xmlhttp = new XMLHttpRequest();
+                xmlhttp.open("GET", urltocall, false);
+                xmlhttp.send();
+                alert("Controller update Web Pages request sent!");
+                
+            }
+
+            function RebootController() {
                 var urltocall = "/reboot";
                 xmlhttp = new XMLHttpRequest();
                 xmlhttp.open("GET", urltocall, false);
                 xmlhttp.send();
                 alert("Controller reboot request sent!");
-                
+
             }
+
             function showUploadButtonFancy() {
                 document.getElementById("detailsheader").innerHTML = "<h3>Upload File<h3>"
                 document.getElementById("status").innerHTML = "";

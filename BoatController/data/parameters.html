@@ -13,6 +13,8 @@
                 <input type="text" id="boat" name="boat"><br /><br />
                 <label for="RCType">RC Receiver Type:</label>
                 <select id="RCType" name="RCType"><option value="1">PWM</option><option value="2">SBus</option><option value="3">IBus</option></select><br /><br />
+                <label for="AutoUpdate">Auto Update from Web:</label>
+                <input type="checkbox" id="AutoUpdate" name="AutoUpdate" value="true" onchange="AutoUpdateChange()" /><br /><br />
             </fieldset>
             <fieldset>
                 <h3>WIFI Details</h3>
@@ -41,6 +43,6 @@
     </div>
     <style>
 
-    </style>
+    </style>    
 </body>
 </html>

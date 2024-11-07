@@ -40,6 +40,7 @@
     <None Include="..\..\..\..\AppData\Local\Temp\VMBuilds\BoatController\esp32_esp32\Debug\BoatController.ino.bin">
       <Filter>Misc Files</Filter>
     </None>
+    <None Include="data\SType.html" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BoatController.ino" />

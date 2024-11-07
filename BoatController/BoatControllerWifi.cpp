@@ -8,12 +8,15 @@
 #include <Update.h>
 #include <ArduinoJson.h>
 #include "BoatControllerConfig.h"
+#include <ssl_client.h>
+#include <WiFiClientSecure.h>
+#include <ESP32httpUpdate.h>
+#include <esp_task_wdt.h>
 
 extern BoatControllerConfigClass bContConfig;
 extern DynamicJsonDocument config;
 extern JsonArray Servos;
 extern String firmwareUpdateFile;
-
 
 const char header_html[] PROGMEM = "<!DOCTYPE html><html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8'/><meta name='viewport' content='width=device-width, initial-scale=1, minimum-scale=1.0, shrink-to-fit=no'><title>GreenPonik.com - WebView</title></head><body>";
 const char footer_html[] PROGMEM = "</body></html>";
@@ -23,13 +26,97 @@ const char update_html[] PROGMEM = "<h1>Only .bin file</h1><form method='POST' a
 bool filereading = false;
 bool espShouldReboot = false;
 String postData = "";
-String updateHost = "";
-String updatePath = "";
 
 AsyncWebServer* server;
 AsyncWebSocket wsHTTPInput("/HTTPInput");
 
-// handles uploads to the filserver
+bool getUpdateFileFromServer() {
+	Serial.printf("Checking for updates...\n");
+	t_httpUpdate_return ret = ESPhttpUpdate.update(String(WebUpdateHost) + String(WebUpdatePath));
+
+	switch (ret) {
+	case HTTP_UPDATE_FAILED:
+		Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s\n", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
+		break;
+
+	case HTTP_UPDATE_NO_UPDATES:
+		Serial.println("HTTP_UPDATE_NO_UPDATES\n");
+		break;
+
+	case HTTP_UPDATE_OK:
+		Serial.println("HTTP_UPDATE_OK\n");
+		break;
+	}
+}
+
+bool UpdateWebPages() {
+	Serial.println("Updating Web Pages...");
+
+	
+	HTTPClient http;
+	uint8_t buff[512] = { 0 };
+						
+	http.begin(String(WebUpdateHost) + String(WebFilesUpdateManifest));
+	int httpResponseCode = http.GET();
+	
+	if (httpResponseCode > 0) {
+		String jsonBuffer;
+		jsonBuffer = http.getString();
+		DynamicJsonDocument doc(1024); 
+		DeserializationError error = deserializeJson(doc, jsonBuffer);
+		JsonArray files = doc["Files"];
+		for (JsonVariant file : files) {
+			esp_task_wdt_init(30, false);
+
+			String fileName = "/" +  file.as<String>();
+			String sourceFile = String(WebUpdateHost)  + doc["Source"].as<String>() + fileName;
+			Serial.println("Downloading " + sourceFile);
+		
+			http.begin(sourceFile);
+			int httpCode = http.GET();
+			if (httpCode > 0) {
+				int totalLength = http.getSize();
+				WiFiClient* stream = http.getStreamPtr();
+
+				int len = totalLength;
+				File wfile = FFat.open(fileName.c_str(), FILE_WRITE);
+				if (!wfile) {
+					Serial.println("Could not create file " + fileName + "!");					
+				}
+				else {
+					while (http.connected() && (len > 0 || len == -1)) {
+						// get available data size
+						size_t size = stream->available();
+						if (size) {
+							// read up to 128 byte
+							int c = stream->readBytes(buff, ((size > sizeof(buff)) ? sizeof(buff) : size));
+							wfile.write(buff, c);
+							if (len > 0) {
+								len -= c;
+							}
+						}
+						float Percent = 100 * (totalLength - len) / totalLength;
+						delay(1);
+					}
+					wfile.close();
+				}				
+			}
+			vTaskDelay(5);
+		
+		}
+		Serial.println("Update Completed!");
+		
+	}
+	else {
+		Serial.print("Error code: ");
+		Serial.println(httpResponseCode);
+	}
+	
+	http.end();
+
+}
+
+	// handles uploads to the filserver
 void handleUpload(AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final) {
 	if (!index) {
 		Serial.println((String) "UploadStart: " + filename);
@@ -150,6 +237,7 @@ void onHTTPInputWebSocketEvent(AsyncWebSocket* server,
 
 			for (JsonVariant value : Servos) {
 				if (value["type"].as<int>() == servoType) {
+					valueInt = map(valueInt, -100, 100, value["min"], value["max"]);
 					value["target"].set(valueInt);
 				}
 			}                       
@@ -213,9 +301,11 @@ void notFound(AsyncWebServerRequest* request) {
 void BoatControllerWififClass::init() {
 	
 	listDir(FFat, "/");
-	IPAddress IP;
 	String staMode = config["Params"]["STAMode"].as<String>();
 	staMode.toLowerCase();
+	String autoUpdate = config["Params"]["AutoUpdate"].as<String>();
+	autoUpdate.toLowerCase();
+
 	if (staMode.equals("true"))
 		Serial.println("Station Mode");
 	else
@@ -231,19 +321,22 @@ void BoatControllerWififClass::init() {
 			Serial.print('.');
 			delay(1000);
 		}
-		IP = WiFi.localIP();
-		Serial.println(WiFi.localIP());
+		this->IP = WiFi.localIP();		
+		if (WiFi.isConnected() && autoUpdate.equals("true")) {
+			getUpdateFileFromServer();
+		}
 	}
 	
 	if (!WiFi.isConnected()) {
 		WiFi.mode(WIFI_AP);
 		WiFi.softAP(config["Params"]["APName"].as<String>().c_str(), config["Params"]["APPass"].as<String>().c_str());
 		Serial.print("Using AP Mode ..");
-		IP = WiFi.softAPIP();
+		this->IP = WiFi.softAPIP();
 	}
 	
 	Serial.print("IP address: ");
-	Serial.println(IP);
+	this->ControllerIPAddress = this->IP.toString();
+	Serial.println(this->ControllerIPAddress);
 	server = new AsyncWebServer(80);
 	
 	server->serveStatic("/", FFat, "/").setDefaultFile("index.html");
@@ -317,7 +410,7 @@ void BoatControllerWififClass::init() {
 					Serial.println("Length: ");
 					Serial.println(request->contentLength());
 
-					StaticJsonDocument<4096> doc;
+					StaticJsonDocument<8192> doc;
 					DeserializationError error = deserializeJson(doc, postData);
 					if (error) {
 						request->send(400, "text/plain", "Fehlerhafte JSON Struktur");
@@ -346,6 +439,12 @@ void BoatControllerWififClass::init() {
 		});
 
 	server->on("/reboot", HTTP_GET, [](AsyncWebServerRequest* request) { ESP.restart(); });
+	
+	server->on("/updateweb", HTTP_GET, [](AsyncWebServerRequest* request) { 
+		request->send(200, "application/json", "{ \"status\": 0 }");
+		delay(10);
+		UpdateWebPages(); }
+	);
 
 	server->on("/file", HTTP_GET, [](AsyncWebServerRequest* request) {
 		String logmessage = "Client:" + request->client()->remoteIP().toString() + " " + request->url();

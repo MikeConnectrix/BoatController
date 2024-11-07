@@ -28,10 +28,6 @@ BoatControllerPWMClass bContIPWM;
 BoatControllerGPSClass bContGPS;
 BoatControllerCompassClass bContCompass;
 BoatControllerConfigClass bContConfig;
-String firmwareVersion = "2.4";
-String firmwareUpdateFile = "BoatController25.bin";
-
-
 
 float Pi = 3.14159;
 float CompassHeading;
@@ -40,19 +36,16 @@ unsigned long bcCurrentMillis;
 unsigned long bcLastCompassMillis;
 unsigned long NextLED = LOW;
 bool TFTConnected = true;
-DynamicJsonDocument config(8192);
+DynamicJsonDocument config(16384);
 JsonArray Servos;
 int RCType = 1;
 
-void ServoDoWork(void* pvParameters) {
-   
-    bContServos.init();	
-   
-    for (;;) {
-		//If the RC Type is PWM, get the readings here as its fast
-		if (RCType==1) bContIPWM.doWork();
-		bContServos.doWork();		
-        bcCurrentMillis = millis();
+void MoveServos() {
+		// If the RC Type is PWM, get the readings here as its fast
+		if (RCType == 1)
+			bContIPWM.doWork();
+		bContServos.doWork();
+		bcCurrentMillis = millis();
 		if (bcCurrentMillis - bcLastCompassMillis > 1000) { // checks every 1 seconds
 			digitalWrite(LED_2, NextLED);
 			bcLastCompassMillis = bcCurrentMillis;
@@ -61,7 +54,15 @@ void ServoDoWork(void* pvParameters) {
 				NextLED = LOW;
 			else
 				NextLED = HIGH;
-		}
+		}	
+}
+
+void ServoDoWork(void* pvParameters) {
+   
+    bContServos.init();	
+   
+    for (;;) {
+		MoveServos();
 		vTaskDelay(2);
     }
 }
@@ -71,7 +72,7 @@ void WifiDoWork(void* pvParameters) {
 
     for (;;) {
         bContWifi.doWork();
-        vTaskDelay(100);
+        delay(20);
     }
 }
 
@@ -84,12 +85,21 @@ void SBusDoWork(void* pvParameters) {
 	}
 }
 
+void IBusDoWork(void* pvParameters) {
+	bContIBus.init();
+
+	for (;;) {
+		bContIBus.doWork();
+		vTaskDelay(2);
+	}
+}
+
 void TFTDoWork(void* pvParameters) {
     bContTFT.init();
 
     for (;;) {
         bContTFT.doWork();
-        vTaskDelay(100);
+        vTaskDelay(20);
     }
 }
 
@@ -105,7 +115,7 @@ void GPSTask(void* pvParameters) {
 
 void setup() {
     Serial.begin(115200);   
-    Serial.printf("Firmware Version %s\n",firmwareVersion);
+    Serial.printf("Firmware Version %s\n", FirmwareVersion);
 	
     if (!FFat.begin(FORMAT_SPIFFS_IF_FAILED)) {
 		Serial.println("FFat Mount Failed");
@@ -140,34 +150,43 @@ void setup() {
     pinMode(LED_1, OUTPUT);
     pinMode(LED_2, OUTPUT);    
 
-    
-    xTaskCreate(
-		ServoDoWork,   // Function that should be called
-		"ServoDoWork", // Name of the task (for debugging)
-		4092,		   // Stack size (bytes)
-		NULL,		   // Parameter to pass
-		10,			   // Task priority
-		NULL		   // Task handle
-	);
+    bContServos.init();	
+ //   xTaskCreate(
+	//	ServoDoWork,   // Function that should be called
+	//	"ServoDoWork", // Name of the task (for debugging)
+	//	4092,		   // Stack size (bytes)
+	//	NULL,		   // Parameter to pass
+	//	10,			   // Task priority
+	//	NULL		   // Task handle
+	//);
 
-	switch (RCType) {
-	case 1://PPM
-		bContIPWM.init();
-		break;
-	case 2://SBus
-		xTaskCreate(
-			SBusDoWork,	  // Function that should be called
-			"SBusDoWork", // Name of the task (for debugging)
-			4096,		 // Stack size (bytes)
-			NULL,		 // Parameter to pass
-			20,			 // Task priority
-			NULL		 // Task handle
-		);
-		break;
-	case 3://IBus
-		bContIBus.init();
-		break;
-	}
+	bContIBus.init();
+
+	//switch (RCType) {
+	//case 1://PPM
+	//	bContIPWM.init();
+	//	break;
+	//case 2://SBus
+	//	xTaskCreate(
+	//		SBusDoWork,	  // Function that should be called
+	//		"SBusDoWork", // Name of the task (for debugging)
+	//		4096,		 // Stack size (bytes)
+	//		NULL,		 // Parameter to pass
+	//		20,			 // Task priority
+	//		NULL		 // Task handle
+	//	);
+	//	break;
+	//case 3://IBus
+	//	xTaskCreate(
+	//		IBusDoWork,	  // Function that should be called
+	//		"IBusDoWork", // Name of the task (for debugging)
+	//		4096,		  // Stack size (bytes)
+	//		NULL,		  // Parameter to pass
+	//		20,			  // Task priority
+	//		NULL		  // Task handle
+	//	);
+	//	break;		
+	//}
 	
 
     if (TFTConnected) {
@@ -185,7 +204,7 @@ void setup() {
     xTaskCreate(
         WifiDoWork,    // Function that should be called
         "WifiDoWork",   // Name of the task (for debugging)
-        4096,            // Stack size (bytes)
+        8192,            // Stack size (bytes)
         NULL,            // Parameter to pass
         40,               // Task priority
         NULL             // Task handle
@@ -204,6 +223,8 @@ void setup() {
 }
 
 
-void loop() {  	
-    vTaskDelay(10);
+void loop() {  
+	bContIBus.doWork();
+	MoveServos();
+    delay(2);
 }

@@ -1,10 +1,13 @@
 #include "BoatControllerTFT.h"
+#include "BoatControllerDefines.h"
 #include "SPI.h"
 #include <FS.h>
 #include <ArduinoJson.h>
-
 #include <TFT_eSPI.h>
 #define CALIBRATION_FILE "/calibrationData"
+#include "BoatControllerWifi.h"
+
+
 
 TFT_eSPI tft = TFT_eSPI();
 
@@ -13,7 +16,26 @@ TFT_eSPI tft = TFT_eSPI();
 int LoopCount;
 unsigned long LastDraw;
 extern DynamicJsonDocument config;
+extern BoatControllerWififClass bContWifi;
 File root;
+
+void DrawMainScreen() {
+	tft.fillScreen(0x0000);
+	tft.drawRect(22, 22, 161, 73, 0xAD55);
+	tft.setTextSize(1);
+	tft.setFreeFont();
+	tft.setTextColor(0xFFFF);
+	tft.drawString("System Information", 29, 26);
+	tft.drawString("FW Version:" + String(FirmwareVersion), 31, 63);
+	tft.drawString("IP Address:" + bContWifi.ControllerIPAddress, 29, 44);
+	tft.drawRect(280, 22, 173, 280, 0xFFFF);
+	tft.fillRoundRect(294, 34, 150, 38, 5, 0x555);
+	tft.fillRoundRect(293, 86, 150, 38, 5, 0x555);
+	tft.setTextColor(0x0);
+	tft.setTextSize(2);
+	tft.drawString("Setup", 339, 45);
+	tft.drawString("Utilities", 319, 97);
+}
 
 void showTime(uint32_t msTime) {
     Serial.print(F(" JPEG drawn in "));
@@ -184,16 +206,10 @@ void DoSlideShow() {
 
 }
 
-
 void BoatControllerTFTClass::init()
 {
-    // Set all chip selects high to avoid bus contention during initialisation of each peripheral
-    digitalWrite(22, HIGH); // Touch controller chip select (if used)
-    digitalWrite(15, HIGH); // TFT screen chip select
-    digitalWrite(5, HIGH); // SD card chips select, must use GPIO 5 (ESP32 SS)
-
-    tft.begin();    
-    
+	tft.begin();
+	
     uint64_t cardSize = SD.cardSize() / (1024 * 1024);
     Serial.printf("SD Card Size: %lluMB\n", cardSize);
     
@@ -228,7 +244,7 @@ void BoatControllerTFTClass::init()
     }
     
     //Set Slideshow delay if SD card detected. Default to 10 seconds if not there.
-    this->SlideshownDelay = config["SlideShowDelay"].as<long>() | 10;
+	this->SlideshownDelay = config["Params"]["SShowDel"].as<long>() | 10;
 	this->SlideshownDelay = this->SlideshownDelay * 1000;
 	Serial.printf("Slide show Delay set to %d\n", this->SlideshownDelay);
     root = SD.open("/");
@@ -242,16 +258,8 @@ void BoatControllerTFTClass::doWork()
     uint16_t x, y;
     static uint16_t color;
     
-
     if (tft.getTouch(&x, &y)) {
-
-        tft.setCursor(5, 5, 2);
-        tft.printf("x: %i     ", x);
-        tft.setCursor(5, 20, 2);
-        tft.printf("y: %i    ", y);
-
-        tft.drawPixel(x, y, color);
-        color += 155;
+        DrawMainScreen();
     }
 
     if (timenow > LastDraw + this->SlideshownDelay) {

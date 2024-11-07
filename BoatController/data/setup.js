@@ -1,6 +1,8 @@
+var STypeLoaded = false;
 var servosLoaded = false;
 var controllersLoaded = false;
 var controllerData;
+var STypeData;
 function GetParamsData(sectionName) {
     $.ajax({
         type: 'GET',
@@ -17,6 +19,11 @@ function GetParamsData(sectionName) {
                 case "Servo": {
                     if (!servosLoaded) loadServos(data);
                     servosLoaded = true;
+                    break;
+                }
+                case "SType": {
+                    if (!STypeLoaded) loadSType(data);
+                    STypeLoaded = true;
                     break;
                 }
                 case "Cont": {
@@ -43,16 +50,22 @@ function resetCompass() {
 }
 function loadParams(params) {
     for (var key in params) {
-        axisBias = params[key];
-        if (key == "STAMode") {
-            document.getElementById("STAMode1").checked = true;
-            if (!(axisBias == "true"))
-                document.getElementById("STAMode2").checked = true;            
-        }
-        else {
-            var element = document.getElementById(key)
-            if (element != null) element.value = axisBias;
-        }
+        
+        switch (key) {            
+            case "STAMode":
+                document.getElementById("STAMode1").checked = true;
+                if (!(params[key] == "true"))
+                    document.getElementById("STAMode2").checked = true;
+                break;
+            case "AutoUpdate":
+                document.getElementById("AutoUpdate").checked = true;
+                if (!(params[key] == "true"))
+                    document.getElementById("AutoUpdate").checked = true;
+                break;
+            default:
+                var element = document.getElementById(key)
+                if (element != null) element.value = params[key];
+        }        
     }
 }
 
@@ -82,6 +95,15 @@ function loadServos(params) {
     }    
 }
 
+function loadSType(params) {
+    STypeData = params;
+    for (var key in params) {
+        STypeDetails = params[key];
+        $("#STypeTable").append(GetSTypeLine(STypeDetails));
+    }
+}
+
+
 function GetServoLine(servoDetails) {
     var controllerTypeOption = "" //"<option value='0'>Built In</option><option value='1'>Rear Controller</option>";
 
@@ -90,6 +112,37 @@ function GetServoLine(servoDetails) {
         controllerTypeOption += "<option value='" + key + "'>" + contDetails["dscn"] + "</option>";        
     }    
 
+    controllerTypeOption = controllerTypeOption.replace("value='" + servoDetails["Ctrl"] + "'", "value='" + servoDetails["Ctrl"] + "' selected");
+
+    var servoTypeOption = "" //"<option value='0'>Built In</option><option value='1'>Rear Controller</option>";
+
+    for (var key in STypeData) {
+        STypeDetails = STypeData[key];
+        servoTypeOption += "<option value='" + key + "'>" + STypeDetails["dscn"] + "</option>";
+    }  
+
+    servoTypeOption = servoTypeOption.replace("value='" + servoDetails["type"] + "'", "value='" + servoDetails["type"] + "' selected");
+
+    rowDetails = "<tr>"
+    rowDetails += "<td><input type='text' id='dscn' class='txtbox' value='" + (servoDetails["dscn"] || 'New Servo')  + "' style='width: 100%'/></td>";
+    rowDetails += "<td class='selBox'><select id='Ctrl' style='width: 100%'>" + controllerTypeOption + "</select></td>";
+    rowDetails += "<td><input type='number' id='Prt' class='txtbox' value='" + (servoDetails["Prt"] || '0') + "' style='width: 100%'/></td>";
+    rowDetails += "<td class='selBox'><select id='type' style='width: 100%'>" + servoTypeOption + "</select></td>";
+    rowDetails += "<td><input type='number' id='spd' class='txtbox' value='" + servoDetails["spd"] + "' style='width: 100%'/></td>";
+    rowDetails += "<td><input type='number' id='ID' class='txtbox' value='" + servoDetails["ID"] + "' readonly style='width: 100%'/></td>";
+    rowDetails += "<td><input type='button' value='Delete Servo' onclick='SomeDeleteRowFunction(this)'/></td>"
+    rowDetails += "</tr>"
+    return rowDetails;
+}
+
+function GetSTypeLine(servoDetails) {
+    var controllerTypeOption = "" //"<option value='0'>Built In</option><option value='1'>Rear Controller</option>";
+
+    for (var key in controllerData) {
+        contDetails = controllerData[key];
+        controllerTypeOption += "<option value='" + key + "'>" + contDetails["dscn"] + "</option>";
+    }
+
     //var controllerTypeOption = "<option value='0'>Built In</option><option value='1'>Rear Controller</option>"; 
     controllerTypeOption = controllerTypeOption.replace("value='" + servoDetails["Ctrl"] + "'", "value='" + servoDetails["Ctrl"] + "' selected");
 
@@ -97,24 +150,23 @@ function GetServoLine(servoDetails) {
     servoTypeOption = servoTypeOption.replace("value='" + servoDetails["type"] + "'", "value='" + servoDetails["type"] + "' selected");
 
     rowDetails = "<tr>"
-    rowDetails += "<td><input type='text' id='dscn' class='txtbox' value='" + (servoDetails["dscn"] || 'New Servo')  + "' style='width: 100%'/></td>";
-    rowDetails += "<td class='selBox'><select id='Ctrl' style='width: 100%'>" + controllerTypeOption + "</select></td>";
-    rowDetails += "<td class='selBox'><select id='type' style='width: 100%'>" + servoTypeOption + "</select></td>";
-    rowDetails += "<td><input type='number' id='Prt' class='txtbox' value='" + (servoDetails["Prt"] || '0') + "' style='width: 100%'/></td>";
-    rowDetails += "<td><input type='number' id='RC' class='txtbox' value='" + (servoDetails["RC"]||'0') + "' style='width: 100%'/></td>";
-    rowDetails += "<td><input type='number' id='parent' class='txtbox' value='" + (servoDetails["parent"] || '') + "' style='width: 100%'/></td>";
-    rowDetails += "<td><input type='number' id='min' class='txtbox' value='" + (servoDetails["min"]||'0')  + "' style='width: 100%'/></td>";
-    rowDetails += "<td><input type='number' id='max' class='txtbox' value='" + (servoDetails["max"]||'180')  + "' style='width: 100%'/></td>";
-    rowDetails += "<td><input type='number' id='spd' class='txtbox' value='" + (servoDetails["spd"] ||'5') + "' style='width: 100%'/></td>";
-    rowDetails += "<td><input type='number' id='homPos' class='txtbox' value='" + (servoDetails["homPos"] ||'90') + "' style='width: 100%'/></td>";
-    rowDetails += "<td><input type='number' id='batPos' class='txtbox' value='" + (servoDetails["batPos"]||'90')   + "' style='width: 100%'/></td>";
-    rowDetails += "<td><input type='number' id='ID' class='txtbox' value='" + servoDetails["ID"] + "' style='width: 100%'/></td>";
+    rowDetails += "<td><input type='text' id='dscn' class='txtbox' value='" + (servoDetails["dscn"] || 'New Servo') + "' style='width: 100%'/></td>";
+    rowDetails += "<td><input type='number' id='min' class='txtbox' value='" + (servoDetails["min"] || '0') + "' style='width: 100%'/></td>";
+    rowDetails += "<td><input type='number' id='max' class='txtbox' value='" + (servoDetails["max"] || '180') + "' style='width: 100%'/></td>";
+    rowDetails += "<td><input type='number' id='spd' class='txtbox' value='" + (servoDetails["spd"] || '5') + "' style='width: 100%'/></td>";
+    rowDetails += "<td><input type='number' id='homPos' class='txtbox' value='" + (servoDetails["homPos"] || '90') + "' style='width: 100%'/></td>";
+    rowDetails += "<td><input type='number' id='batPos' class='txtbox' value='" + (servoDetails["batPos"] || '90') + "' style='width: 100%'/></td>";
+    rowDetails += "<td><input type='number' id='ID' class='txtbox' value='" + servoDetails["ID"] + "' readonly style='width: 100%'/></td>";
     rowDetails += "<td><input type='button' value='Delete Servo' onclick='SomeDeleteRowFunction(this)'/></td>"
     rowDetails += "</tr>"
     return rowDetails;
 }
 function addServo() {
     $("#servoTable").append(GetServoLine([]));
+}
+
+function addSType() {
+    $("#STypeTable").append(GetSTypeLine([]));
 }
 
 function addController() {
@@ -127,6 +179,8 @@ function saveParameters(elementid, section) {
     var submitData = true;
     switch (section) {
         case "Cont": postData = getTableData("controllerTable");
+            break;
+        case "SType": postData = getTableData("STypeTable");
             break;
         case "Servo": postData = getTableData("servoTable");
             break;
@@ -197,6 +251,7 @@ function SetFormDetails() {
     $('#parametersContent').load('parameters.html');
     $('#compassContent').load('compass.html');
     $('#controllersContent').load('controllers.html');
+    $('#STypeContent').load('SType.html');
     $('#servosContent').load('servos.html');
     $('#uploadContent').load('upload.html');
     $('#updateContent').load('update.html');
@@ -234,4 +289,12 @@ function openSection(evt, sectionName,GetData) {
 function saveChanges(evt, sectionName) {
     // Declare all variables
     alert("Changes updated!");
+}
+
+function AutoUpdateChange() {
+    var chkBox = document.getElementById("AutoUpdate");
+    if (chkBox.checked)
+        chkBox.attributes("Value") = "True";
+    else
+        chkBox.attributes("Value") = "False";
 }
