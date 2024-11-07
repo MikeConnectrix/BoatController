@@ -25,3 +25,9 @@ So as the boat moves through the water, the turrets will remain trained on whate
 The configuration file allows for individual servo movement speeds so rate of turn for indiividual turrets can be set to something approaching realistic levels.
 
 The configuration file is a relatively simple json document that can be downloaded, altered and uploaded back through the ESP32's web interface.
+
+Changes Log:
+
+* 7/Nov/2024
+> * Updated servo Types input to allow greater number of defined servos
+> * Add IBus integration      
