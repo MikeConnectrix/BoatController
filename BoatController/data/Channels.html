@@ -1,0 +1,40 @@
+<HTML>
+<HEAD>
+    <META NAME="GENERATOR" Content="Microsoft Visual Studio">
+    <TITLE></TITLE>
+</HEAD>
+<BODY>
+    <div>
+        <form id="frmChannels" name="frmChannels">
+            <table id="channelTable"   style="width:60%" align="center">
+                <tr>
+                    <th  id="channel">RC Channel</th>
+                    <th id="servo">Servo</th>
+                    <th id="condition">Reference Channel</th>
+                    <th id="min">Min</th>
+                    <th id="max">Max</th>
+                    <th >Action</th>
+                </tr>
+            </table>
+            <br />
+            <button onclick="addChannel()">Add Another</button>
+            <input value="Save Changes" type="submit" onclick="saveParameters('frmChannels','Channels')">
+        </form>
+
+        <div align="center">
+            <dl>
+                <dt>RC Channel</dt>
+                <dd>Which transmitter channel from the remote control is this entry for</dd>
+                <dt>Servo</dt>
+                <dd>Which servo will the channel move. Check the Servos Tab for the correct ID Number</dd>
+                <dt>Reference Channel</dt>
+                <dd>Which transmitter channel limits when this servo will move</dd>
+                <dt>Min</dt>
+                <dd>The minimum value of the reference channel when this servo will move</dd>
+                <dt>Max</dt>
+                <dd>The maximum value of the reference channel when this servo will move</dd>
+            </dl>
+        </div>
+        
+</BODY>
+</HTML>

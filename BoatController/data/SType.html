@@ -6,16 +6,17 @@
 <BODY>
     <div>
         <form id="frmSType" name="frmSType">
-            <table id="STypeTable" name="STypeTable" style="width:100%">
+            <table id="STypeTable" name="STypeTable" style="width:80%" align="center">
                 <tr>
-                    <th class="selBox" id="dscn">Description</th>
-                    <th style="width: 5% " id="min">Min</th>
-                    <th style="width: 5% " id="max">Max</th>
-                    <th style="width: 5% " id="spd">Speed</th>
-                    <th style="width: 5% " id="homPos">Home Pos</th>
-                    <th style="width: 5% " id="batPos">Battery Pos</th>
-                    <th style="width: 5%" id="ID">Servo Type ID</th>
-                    <th style="width: 10% ">Action</th>
+                    <th id="dscn">Description</th>
+                    <th id="min">Min</th>
+                    <th id="max">Max</th>
+                    <th id="spd">Speed</th>
+                    <th id="step">Step Size</th>
+                    <th id="homPos">Home Pos</th>
+                    <th id="batPos">Battery Pos</th>
+                    <th id="ID">Servo Type ID</th>
+                    <th>Action</th>
                 </tr>
             </table>
             <br />
@@ -23,6 +24,29 @@
             <input value="Save Changes" type="submit" onclick="saveParameters('frmSType','SType')">
         </form>
     </div>
+
+    <div align="center">
+        <dl>
+            <dt>Descripion</dt>
+            <dd>Used in the servo input form to allow easy recognition</dd>
+            <dt>Min</dt>
+            <dd>Minimum Angular address for this type of servo - Typically zero for a 180 degree servo</dd>
+            <dt>Max</dt>
+            <dd>Maximum angular address for this type of servo - Typically something like 180 for a 180 Degreee Servo</dd>
+            <dt>Speed</dt>
+            <dd>Default traverse speed to be used for this type of servo - Lower value is faster, 5 fairly quick,25 fairly slow</dd>
+            <dt>Step Size</dt>
+            <dd>The number of degrees to step. Smaller numbers give smoother turning, larger numbers faster but with less resolution</dd>
+            <dt>Home Pos</dt>
+            <dd>Default position when the servo is out of use for this type of servo</dd>
+            <dt>Battery Pos</dt>
+            <dd>Default position when the servo is being controlled by a range finder but is out of scope for this type of servo</dd>
+            <dt>Servo Type ID</dt>
+            <dd>ID number of this servo type. Read only. Set once saved if empty</dd>
+
+        </dl>
+    </div>
+
 
 </BODY>
 </HTML>

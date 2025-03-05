@@ -1,0 +1,28 @@
+<HTML>
+<HEAD>
+    <META NAME="GENERATOR" Content="Microsoft Visual Studio">
+    <TITLE></TITLE>
+</HEAD>
+<BODY>
+    <div>
+        <form id="frmDebug" name="frmDebug">
+            <div>
+                <p>Controller debug information</p>
+                <textarea id="debugData" style="width:800px;height:600px;" />
+                <fieldset style="width:800px;">
+                    <p>Show debug Info for: </p>
+                    <label for="debugCompass">Compass</label>
+                    <input id="debugCompass" type="checkbox" value="compass" onchange="sendValue('debugCompass',checked)" />
+                    <label for="debugTracking">Tracking</label>
+                    <input id="debugTracking" type="checkbox" value="tracking" onchange="sendValue('debugTracking',checked)" />
+                    <label for="debugServos">Servos</label>
+                    <input id="debugServos" type="checkbox" value="servos" onchange="sendValue('debugServos',checked)" />
+                    <label for="debugChannels">RC Channels</label>
+                    <input id="debugChannels" type="checkbox" value="servos" onchange="sendValue('debugChannels',checked)" />
+                </fieldset>
+
+            </div>
+        </form>
+    </div>
+</BODY>
+</HTML>

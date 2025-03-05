@@ -15,6 +15,7 @@ protected:
 public:
 	void init();
 	void doWork();
+	void TFTBuffer(String msg);
 	
 
 private:

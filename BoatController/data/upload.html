@@ -52,13 +52,15 @@
                     window.open(urltocall, "_blank");
                 }
             }
-            function UpdateWebPages(){
-                var urltocall = "/updateweb";
-                xmlhttp = new XMLHttpRequest();
-                xmlhttp.open("GET", urltocall, false);
-                xmlhttp.send();
-                alert("Controller update Web Pages request sent!");
-                
+            function UpdateWebPages() {
+                var check = confirm("Are you sure you want to update the unit web pages?");
+                if (check == true) {
+                    var urltocall = "/updateweb";
+                    xmlhttp = new XMLHttpRequest();
+                    xmlhttp.open("GET", urltocall, false);
+                    xmlhttp.send();
+                    alert("Controller update Web Pages request sent!");
+                }                
             }
 
             function RebootController() {

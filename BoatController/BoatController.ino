@@ -1,3 +1,5 @@
+#include "BoatControllerTFTScreenInput.h"
+#include "BoatControllerTFTScreen.h"
 #include "BoatControllerPWM.h"
 #include "BoatControllerIBus.h"
 #include "BoatControllerConfig.h"
@@ -29,42 +31,53 @@ BoatControllerGPSClass bContGPS;
 BoatControllerCompassClass bContCompass;
 BoatControllerConfigClass bContConfig;
 
+bool debugServos = false;
+bool debugRCChannels = false;
+bool debugCompass= false;
+bool debugTracking;
+
 float Pi = 3.14159;
 float CompassHeading;
 
 unsigned long bcCurrentMillis;
 unsigned long bcLastCompassMillis;
+unsigned long bcLastGPSMillis;
 unsigned long NextLED = LOW;
 bool TFTConnected = true;
-DynamicJsonDocument config(16384);
+DynamicJsonDocument config(32768);
 JsonArray Servos;
-int RCType = 1;
+JsonArray Channels;
+JsonArray ServoTypes;
 
-void MoveServos() {
-		// If the RC Type is PWM, get the readings here as its fast
+int RCType = 1;
+File debugFile;
+int debugWrites = 0;
+
+void RCDoWork(void* pvParameters) {
+	Serial.printf("RC Type is %d\n", RCType);
+
+	switch (RCType) {
+	case 1: // PPM
+		bContIPWM.init();
+		break;
+	case 2: // SBus
+		bContSBus.init();
+		break;
+	case 3: // IBus
+		bContIBus.init();
+		break;
+	}
+
+	for (;;) {
+		// If the RC Type is PWM or IBus, get the readings here as its fast
 		if (RCType == 1)
 			bContIPWM.doWork();
-		bContServos.doWork();
-		bcCurrentMillis = millis();
-		if (bcCurrentMillis - bcLastCompassMillis > 1000) { // checks every 1 seconds
-			digitalWrite(LED_2, NextLED);
-			bcLastCompassMillis = bcCurrentMillis;
-			bContCompass.doWork();
-			if (NextLED == HIGH)
-				NextLED = LOW;
-			else
-				NextLED = HIGH;
-		}	
-}
-
-void ServoDoWork(void* pvParameters) {
-   
-    bContServos.init();	
-   
-    for (;;) {
-		MoveServos();
-		vTaskDelay(2);
-    }
+		if (RCType == 2)
+			bContSBus.doWork();
+		if (RCType == 3)
+			bContIBus.doWork();
+		vTaskDelay(10);
+	}
 }
 
 void WifiDoWork(void* pvParameters) {
@@ -72,26 +85,8 @@ void WifiDoWork(void* pvParameters) {
 
     for (;;) {
         bContWifi.doWork();
-        delay(20);
+		vTaskDelay(20);
     }
-}
-
-void SBusDoWork(void* pvParameters) {
-	bContSBus.init();
-
-	for (;;) {
-		bContSBus.doWork();
-		vTaskDelay(2);
-	}
-}
-
-void IBusDoWork(void* pvParameters) {
-	bContIBus.init();
-
-	for (;;) {
-		bContIBus.doWork();
-		vTaskDelay(2);
-	}
 }
 
 void TFTDoWork(void* pvParameters) {
@@ -99,7 +94,7 @@ void TFTDoWork(void* pvParameters) {
 
     for (;;) {
         bContTFT.doWork();
-        vTaskDelay(20);
+        vTaskDelay(10);
     }
 }
 
@@ -111,6 +106,25 @@ void GPSTask(void* pvParameters) {
         vTaskDelay(5000);
 
     }
+}
+
+void WriteDebug(String msg) {
+	Serial.println(msg);
+	bContTFT.TFTBuffer(msg);	
+	char buf[200];
+	sprintf(buf, "{\"debug\":\"%s\"}", msg.c_str());
+	bContWifi.sendSocketMessage(buf);   
+
+
+	if (debugFile) {
+		debugFile.print(msg);
+		debugWrites++;
+		if (debugWrites > 10) {
+			debugFile.close();
+			debugFile = SD.open("/debug.txt", FILE_APPEND);
+			debugWrites = 0;
+		}
+	}	
 }
 
 void setup() {
@@ -139,54 +153,30 @@ void setup() {
 			tconf.close();
 			conf.close();
         }
+		debugFile = SD.open("/debug.txt", "w");
     
 	}
-
 
     bContConfig.init();
 	bContConfig.readConfig(); 
 	RCType = config["Params"]["RCType"];
-    bContCompass.init();
-    pinMode(LED_1, OUTPUT);
-    pinMode(LED_2, OUTPUT);    
 
-    bContServos.init();	
- //   xTaskCreate(
-	//	ServoDoWork,   // Function that should be called
-	//	"ServoDoWork", // Name of the task (for debugging)
-	//	4092,		   // Stack size (bytes)
-	//	NULL,		   // Parameter to pass
-	//	10,			   // Task priority
-	//	NULL		   // Task handle
-	//);
+	pinMode(LED_1, OUTPUT);
+	pinMode(LED_2, OUTPUT);   
 
-	bContIBus.init();
 
-	//switch (RCType) {
-	//case 1://PPM
-	//	bContIPWM.init();
-	//	break;
-	//case 2://SBus
-	//	xTaskCreate(
-	//		SBusDoWork,	  // Function that should be called
-	//		"SBusDoWork", // Name of the task (for debugging)
-	//		4096,		 // Stack size (bytes)
-	//		NULL,		 // Parameter to pass
-	//		20,			 // Task priority
-	//		NULL		 // Task handle
-	//	);
-	//	break;
-	//case 3://IBus
-	//	xTaskCreate(
-	//		IBusDoWork,	  // Function that should be called
-	//		"IBusDoWork", // Name of the task (for debugging)
-	//		4096,		  // Stack size (bytes)
-	//		NULL,		  // Parameter to pass
-	//		20,			  // Task priority
-	//		NULL		  // Task handle
-	//	);
-	//	break;		
-	//}
+	bContCompass.init();	
+	bContServos.init();	
+	bContGPS.init();
+	
+	xTaskCreate(
+		RCDoWork,	 // Function that should be called
+		"RCDoWork", // Name of the task (for debugging)
+		4096,		 // Stack size (bytes)
+		NULL,		 // Parameter to pass
+		5,			 // Task priority
+		NULL		 // Task handle
+	);
 	
 
     if (TFTConnected) {
@@ -195,7 +185,7 @@ void setup() {
             "TFTDoWork",   // Name of the task (for debugging)
             4096,            // Stack size (bytes)
             NULL,            // Parameter to pass
-            30,               // Task priority
+            10,               // Task priority
             NULL             // Task handle
         );
     }
@@ -204,27 +194,33 @@ void setup() {
     xTaskCreate(
         WifiDoWork,    // Function that should be called
         "WifiDoWork",   // Name of the task (for debugging)
-        8192,            // Stack size (bytes)
+        4096,            // Stack size (bytes)
         NULL,            // Parameter to pass
-        40,               // Task priority
+        5,               // Task priority
         NULL             // Task handle
     );
-
-    xTaskCreate(
-        GPSTask,    // Function that should be called
-        "GPSTask",   // Name of the task (for debugging)
-        2048,            // Stack size (bytes)
-        NULL,            // Parameter to pass
-        50,               // Task priority
-        NULL             // Task handle
-    );
-
-    
+   
 }
 
 
 void loop() {  
-	bContIBus.doWork();
-	MoveServos();
-    delay(2);
+	bcCurrentMillis = millis();
+	
+	bContServos.doWork();
+	
+	if (bcCurrentMillis - bcLastCompassMillis > 1000) { // checks every 1 seconds
+		digitalWrite(LED_2, NextLED);
+		bcLastCompassMillis = bcCurrentMillis;
+		bContCompass.doWork();
+		if (NextLED == HIGH)
+			NextLED = LOW;
+		else
+			NextLED = HIGH;
+	}
+	if (bcCurrentMillis - bcLastGPSMillis > 30000) { // checks every 30 seconds
+		bcLastGPSMillis = bcCurrentMillis;
+		bContGPS.doWork();
+	}
+	
+	vTaskDelay(10);
 }

@@ -6,22 +6,58 @@
 <BODY>
     <div>
         <form id="frmServos" name="frmServos">
-            <table id="servoTable" name="servoTable" style="width:100%">
+            <table id="servoTable" name="servoTable"  style="width:90%" align="center">
                 <tr>
-                    <th class="selBox" id="dscn">Description</th>
+                    <th class="txtBox" id="dscn">Description</th>
                     <th class="selBox" id="Ctrl">Controller</th>
-                    <th style="width: 5% " id="Prt">Port Number</th>
+                    <th id="Prt">Port Number</th>
                     <th class="selBox" id="type">Servo Type</th>
-                    <th style="width: 5% " id="spd">Speed</th>
-                    <th style="width: 5%" id="ID">Servo ID</th>
-                    <th style="width: 10% ">Action</th>
+                    <th align:"center" id="cc">Controling Servo</th>
+                    <th class="chkBox" id="rev">Reverse</th>
+                    <th class="chkBox" id="abs">Absolute</th>
+                    <th class="chkBox" id="track">Tracker</th>
+                    <th id="center">Centre Angle</th>
+                    <th id="spd">Speed</th>
+                    <th id="step">Step Size</th>
+                    <th id="ID">Servo ID</th>
+                    <th>Action</th>
                 </tr>
             </table>
             <br />
             <button onclick="addServo()">Add Another</button>
             <input value="Save Changes" type="submit" onclick="saveParameters('frmServos','Servo')">
         </form>
-    </div>   
-    
+    </div>
+
+    <div align="center">
+        <dl>
+            <dt>Descripion</dt>
+            <dd>Used for identification in RC Channels setup</dd>
+            <dt>Controller</dt>
+            <dd>Which controller the servo is attached to</dd>
+            <dt>Port Number</dt>
+            <dd>Which controller port number the servo is attached to</dd>
+            <dt>Servo Type</dt>
+            <dd>Base class of servo from the Servo Types screen</dd>
+            <dt>Controlling Servo</dt>
+            <dd>A servo which will move this servo as it moves - Typically the ID of a Range Finder type servo</dd>
+            <dt>Reverse</dt>
+            <dd>Reverse the direction of the servo</dd>
+            <dt>Absolute</dt>
+            <dd>Does the servo use absolute or relative positioning - Absolute the angle is determined by the RC channel angle - Relative is incremental</dd>
+            <dt>Tracker</dt>
+            <dd>When set to a non-home position does this servo track the compass</dd>
+            <dt>Center Angle</dt>
+            <dd>What angle to the centreline of the hull does this servo face when centered (0-359 180 means facing directoy to rear) </dd>
+            <dt>Speed</dt>
+            <dd>Custom traverse speed for this servo  - Lower value is faster, 5 fairly quick,25 fairly slow</dd>
+            <dt>Step Size</dt>
+            <dd>Custom Step Size for this servo  - Lower value is slower but with better resolution</dd>
+            <dt>Servo ID</dt>
+            <dd>System Identifier for servo (Read only,set on save if not present)</dd>
+
+        </dl>
+    </div>
+
 </BODY>
 </HTML>

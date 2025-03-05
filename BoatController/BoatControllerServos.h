@@ -16,6 +16,7 @@ public:
 	void init();
 	void doWork();
 	void scanI2C();
+	void moveServo(int channelID,int ServoID, float newValue);
 
 private:
 

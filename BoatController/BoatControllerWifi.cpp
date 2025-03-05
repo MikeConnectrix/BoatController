@@ -1,22 +1,31 @@
 #include "BoatControllerWifi.h"
+#include "BoatControllerServos.h"
+#include "BoatControllerDefines.h"
+#include "BoatControllerConfig.h"
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include "FFat.h"
 #include <iostream>
 #include <sstream>
-#include "BoatControllerDefines.h"
 #include <Update.h>
 #include <ArduinoJson.h>
-#include "BoatControllerConfig.h"
 #include <ssl_client.h>
 #include <WiFiClientSecure.h>
 #include <ESP32httpUpdate.h>
 #include <esp_task_wdt.h>
 
 extern BoatControllerConfigClass bContConfig;
+extern BoatControllerServosClass bContServos;
 extern DynamicJsonDocument config;
 extern JsonArray Servos;
+extern JsonArray Channels;
+extern JsonArray ServoTypes;
 extern String firmwareUpdateFile;
+extern void WriteDebug(String msg);
+extern bool debugServos;
+extern bool debugRCChannels;
+extern bool debugCompass;
+extern bool debugTracking;
 
 const char header_html[] PROGMEM = "<!DOCTYPE html><html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8'/><meta name='viewport' content='width=device-width, initial-scale=1, minimum-scale=1.0, shrink-to-fit=no'><title>GreenPonik.com - WebView</title></head><body>";
 const char footer_html[] PROGMEM = "</body></html>";
@@ -49,9 +58,23 @@ bool getUpdateFileFromServer() {
 	}
 }
 
-bool UpdateWebPages() {
-	Serial.println("Updating Web Pages...");
-
+void FormatFFAT() {
+	WriteDebug("Formatting FFAT Drive...");
+	FFat.end();
+	if (FFat.format()) {
+		if (FFat.begin()) {
+			bContConfig.saveConfig();
+			WriteDebug("Formatting Complete!");
+		}
+		else
+			WriteDebug("Formated drive but did not save config!");
+	}
+	else
+		WriteDebug("Formatting Failed!");
+}
+	
+void UpdateWebPages() {
+	WriteDebug("Updating Web Pages...");	
 	
 	HTTPClient http;
 	uint8_t buff[512] = { 0 };
@@ -70,7 +93,7 @@ bool UpdateWebPages() {
 
 			String fileName = "/" +  file.as<String>();
 			String sourceFile = String(WebUpdateHost)  + doc["Source"].as<String>() + fileName;
-			Serial.println("Downloading " + sourceFile);
+			WriteDebug("Downloading " + fileName);
 		
 			http.begin(sourceFile);
 			int httpCode = http.GET();
@@ -81,7 +104,7 @@ bool UpdateWebPages() {
 				int len = totalLength;
 				File wfile = FFat.open(fileName.c_str(), FILE_WRITE);
 				if (!wfile) {
-					Serial.println("Could not create file " + fileName + "!");					
+					WriteDebug("Could not create file " + fileName + "!");					
 				}
 				else {
 					while (http.connected() && (len > 0 || len == -1)) {
@@ -104,7 +127,7 @@ bool UpdateWebPages() {
 			vTaskDelay(5);
 		
 		}
-		Serial.println("Update Completed!");
+		WriteDebug("Update Completed!");
 		
 	}
 	else {
@@ -209,13 +232,17 @@ void onHTTPInputWebSocketEvent(AsyncWebSocket* server,
     uint8_t* data,
     size_t len)
 {
+	char msg[200];
+        
     switch (type)
     {
     case WS_EVT_CONNECT:
-        Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+		sprintf(msg,"WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+		WriteDebug(msg);
         break;
     case WS_EVT_DISCONNECT:
-        Serial.printf("WebSocket client #%u disconnected\n", client->id());
+		sprintf(msg, "WebSocket client #%u disconnected\n", client->id());
+		WriteDebug(msg);
         break;
     case WS_EVT_DATA:
         AwsFrameInfo* info;
@@ -228,19 +255,32 @@ void onHTTPInputWebSocketEvent(AsyncWebSocket* server,
             std::string key, value;
             std::getline(ss, key, ',');
             std::getline(ss, value, ',');
-            Serial.printf("Key [%s] Value[%s]\n", key.c_str(), value.c_str());
-            int valueInt = atoi(value.c_str());
-			int servoType=1;
 			
-            if (key == "Bearing")
-				servoType = 2;
+			for (JsonVariant channel : Channels) {
+				if (channel["channel"].as<String>().equals(key.c_str())) {
+					int valueInt = atoi(value.c_str());
+					sprintf(msg, "Key [%s] Value[%d]", key.c_str(), valueInt);
+					WriteDebug(msg);			
+					JsonVariant servoType = ServoTypes[Servos[channel["servo"].as<int>()]["type"].as<int>()];
+					int min = servoType["min"].as<int>();
+					int max = servoType["max"].as<int>();
 
-			for (JsonVariant value : Servos) {
-				if (value["type"].as<int>() == servoType) {
-					valueInt = map(valueInt, -100, 100, value["min"], value["max"]);
-					value["target"].set(valueInt);
+					valueInt = map(valueInt, -100, 100, min, max);
+					Serial.printf("%s Channel [%d] Servo [%d]  Min [%d] Max[%d] Deg[%d]\n", Servos[channel["servo"]]["dscn"].as<String>(),channel["ID"].as<int>(), min, max, valueInt);
+					bContServos.moveServo(atoi(key.c_str()), atoi(key.c_str()), valueInt);					
 				}
 			}                       
+
+			if (key == "debugServos")
+				debugServos = value == "true";
+			if (key == "debugChannels")
+				debugRCChannels = value == "true";
+			if (key == "debugCompass")
+				debugCompass = value == "true";
+			if (key == "debugTracking")
+				debugTracking = value == "true";
+
+
         }
         break;
     case WS_EVT_PONG:
@@ -248,7 +288,7 @@ void onHTTPInputWebSocketEvent(AsyncWebSocket* server,
         break;
     default:
         break;
-    }
+    }	
 }
 
 String humanReadableSize(const size_t bytes) {
@@ -270,13 +310,13 @@ String listFiles(bool ishtml) {
 	File root = FFat.open("/");
 	File foundfile = root.openNextFile();
 	if (ishtml) {
-		returnText += "<table><tr><th align='left'>Name</th><th align='left'>Size</th><th></th><th></th></tr>";
+		returnText += "<div class='fileList'><table><tr><th align='left'>Name</th><th align='left'>Size</th><th>Action</th></tr>";
 	}
 	while (foundfile) {
 		if (ishtml) {
-			returnText += "<tr align='left'><td>" + String(foundfile.name()) + "</td><td>" + humanReadableSize(foundfile.size()) + "</td>";
+			returnText += "<tr align='left'><td>" + String(foundfile.name()) + "</td><td align='center'>" + humanReadableSize(foundfile.size()) + "</td>";
 			returnText += "<td><button onclick=\"downloadDeleteButton(\'" + String(foundfile.name()) + "\', \'download\')\">Download</button>";
-			returnText += "<td><button onclick=\"downloadDeleteButton(\'" + String(foundfile.name()) + "\', \'delete\')\">Delete</button></tr>";
+			returnText += "<button onclick=\"downloadDeleteButton(\'" + String(foundfile.name()) + "\', \'delete\')\">Delete</button></td></tr>";
 		}
 		else {
 			returnText += "File: " + String(foundfile.name()) + " Size: " + humanReadableSize(foundfile.size()) + "\n";
@@ -284,7 +324,7 @@ String listFiles(bool ishtml) {
 		foundfile = root.openNextFile();
 	}
 	if (ishtml) {
-		returnText += "</table>";
+		returnText += "</table></div>";
 	}
 	root.close();
 	foundfile.close();
@@ -438,7 +478,11 @@ void BoatControllerWififClass::init() {
 			
 		});
 
-	server->on("/reboot", HTTP_GET, [](AsyncWebServerRequest* request) { ESP.restart(); });
+	server->on("/reboot", HTTP_GET, [](AsyncWebServerRequest* request) { 
+		request->send(200, "text/plain", "Device Reboot issued!");
+		ESP.restart(); 		
+	});
+	server->on("/format", HTTP_GET, [](AsyncWebServerRequest* request) { FormatFFAT(); });
 	
 	server->on("/updateweb", HTTP_GET, [](AsyncWebServerRequest* request) { 
 		request->send(200, "application/json", "{ \"status\": 0 }");
@@ -491,11 +535,19 @@ void BoatControllerWififClass::init() {
 }
 
 void BoatControllerWififClass::doWork()
-{
+{	
     wsHTTPInput.cleanupClients();
+	if (this->bUpdateWebPages==true) {		
+		Serial.println("Queued Web Page Update");		
+		this->bUpdateWebPages = false;		
+	}
 }
 
 void BoatControllerWififClass::sendSocketMessage(String msg)
 {
-    wsHTTPInput.textAll(msg);
+	wsHTTPInput.textAll(msg.c_str(), msg.length());
+}
+
+void BoatControllerWififClass::UpdateDeviceWebPages() {
+	this->bUpdateWebPages = true;	
 }

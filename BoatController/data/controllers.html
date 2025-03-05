@@ -6,19 +6,30 @@
 <BODY>
     <div>
         <form id="frmControllers" name="frmControllers">
-            <table id="controllerTable" style="width:100%">
+            <table id="controllerTable" style="width:60%" align="center">
                 <tr>
                     <th style="width: 20% " id="dscn">Description</th>
                     <th style="width: 10% " id="I2C">I2C Address</th>
                     <th style="width: 10% " id="ID">Controller ID</th>
-                    <th style="width: 10% " >Action</th>                    
+                    <th style="width: 10% ">Action</th>
                 </tr>
             </table>
             <br />
             <button onclick="addController()">Add Another</button>
             <input value="Save Changes" type="submit" onclick="saveParameters('frmControllers','Cont')">
         </form>
-</div>
+    </div>
+
+    <div align="center">
+        <dl>
+            <dt>Description</dt>
+            <dd>Used in the servo input form to allow easy recognition</dd>
+            <dt>I2C Address</dt>
+            <dd>The I2C address displayed in the devices controller scan</dd>
+            <dt>Controller ID</dt>
+            <dd>System ID number of the controller for internal use only. Read only, set by system.</dd>
+        </dl>
+    </div>
 
 </BODY>
 </HTML>

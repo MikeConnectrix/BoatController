@@ -12,9 +12,7 @@ document.addEventListener('DOMContentLoaded', function (event) {
             // Call the function to use the data on the page.
             deviceOrientationHandler(tiltLR, tiltFB, dir);
         }, false);
-    } else {
-        document.getElementById('notice').innerHTML = 'No API detected'
-    };
+    } 
 
     function deviceOrientationHandler(tiltLR, tiltFB, dir) {
         document.getElementById('tiltLR').innerHTML = Math.ceil(tiltLR);

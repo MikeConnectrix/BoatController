@@ -33,11 +33,7 @@ td.button:active {
 table, th, td {
     border: 1px solid;
     border-color: aliceblue;
-    width: 80%;
-}
-
-td{
-    min-width:80px;    
+    width: 30%;    
 }
 
 td.button {
@@ -85,3 +81,70 @@ button {
     font-weight: normal;
     color: #000000;
 }
+
+dl {
+    border: 2px solid #ccc;
+    padding: 1.2em;
+    width:60%; 
+}
+
+dt {
+    float: left;
+    clear: left;
+    width: 200px;
+    text-align: right;
+    font-weight: bold;
+    color: green;
+    font-size: smaller;
+    padding-right:20px;
+}
+
+    dt::after {
+        content: ":";
+    }
+
+dd {
+    margin: 0 0 0 100px;
+    padding: 0 0 0.5em 1em;
+    font-size: smaller;
+    text-align: left;
+}
+
+td.selBox, th.selBox, th.txtBox {
+    width: 30%;
+    text-align: center;
+    min-width:350px;
+}
+
+td input {
+    width: 100%;    
+}
+
+td select {
+    width: 100%;
+}
+
+td{
+    min-width:60px;
+}
+
+td.selBox{
+    width:100%;
+}
+
+td.chkBox, th.chkBox {
+    max-width: 100px;
+    text-align: center;
+    padding: 1px;
+}
+
+.fileList table {
+    margin-left: auto;
+    margin-right: auto;
+    width: 60%;
+    align-items: center;
+}
+.fileList td button {
+    width: 50%;
+}
+

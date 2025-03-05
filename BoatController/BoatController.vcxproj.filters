@@ -41,6 +41,8 @@
       <Filter>Misc Files</Filter>
     </None>
     <None Include="data\SType.html" />
+    <None Include="data\Channels.html" />
+    <None Include="data\debug.html" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BoatController.ino" />
@@ -69,6 +71,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BoatControllerPWM.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BoatControllerTFTScreen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BoatControllerTFTScreenInput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -104,6 +112,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BoatControllerPWM.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BoatControllerTFTScreen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BoatControllerTFTScreenInput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

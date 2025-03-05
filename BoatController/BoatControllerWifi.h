@@ -14,9 +14,11 @@ protected:
 public:
 	void init();
 	void doWork();
+	void UpdateDeviceWebPages();
 	void sendSocketMessage(String msg);
 	IPAddress IP;
 	String ControllerIPAddress = "";
+	bool bUpdateWebPages = false;
 
 private:
 

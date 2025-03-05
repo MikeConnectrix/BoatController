@@ -6,9 +6,9 @@
     <script language="JavaScript" type="text/javascript" src="jquery-ui.js"></script>
     <script language="JavaScript" type="text/javascript" src="setup.js"></script>
     <script src="Sidebar.js"></script>
-    <link href="boatcontroller.css" rel="stylesheet" />
     <link href="Sidebar.css" rel="stylesheet" />
     <link href="setup.css" rel="stylesheet" />
+    <link href="boatcontroller.css" rel="stylesheet" />
     <script>
         document
             .addEventListener("DOMContentLoaded",
@@ -39,6 +39,7 @@
             <button class="tablinks" onclick="openSection(event, 'Cont',true)">Servo Controllers</button>
             <button class="tablinks" onclick="openSection(event, 'SType',true)">Servo Types</button>
             <button class="tablinks" onclick="openSection(event, 'Servo',true)">Servos</button>
+            <button class="tablinks" onclick="openSection(event, 'Channels',true)">RC Channels</button>
             <button class="tablinks" onclick="openSection(event, 'Upload',false)">File Manager</button>
             <button class="tablinks" onclick="openSection(event, 'Update',false)">Firmware Update</button>
         </div>
@@ -47,7 +48,7 @@
             <div id="parametersContent"></div>
         </div>
 
-        <div id="Cont" class="tabcontent">
+        <div id="Cont" class="tabcontent" >
             <div id="controllersContent"></div>
         </div>
 
@@ -67,18 +68,16 @@
             <div id="servosContent">
             </div>
         </div>
+        <div id="Channels" class="tabcontent">
+            <div id="channelsContent">
+            </div>
+        </div>
         <div id="SType" class="tabcontent">
             <div id="STypeContent">
             </div>
         </div>
 
-    </div>
-    <style>
-        td.selBox,th.selBox {
-            width: 500px;
-            text-align: center;
-        }
-    </style>
+    </div>    
 </BODY>
    
 

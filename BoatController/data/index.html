@@ -18,7 +18,7 @@
         document
             .addEventListener("DOMContentLoaded",
                 function () {
-                    SetIndexFormDetails();
+                    SetFormDetails();
                 });
     </script>
 
@@ -45,92 +45,96 @@
         <div class="tab">
             <button class="tablinks" onclick="openSection(event, 'NavigationControl',false)" id="defaultOpen">Navigation</button>
             <button class="tablinks" onclick="openSection(event, 'GunControl',false)">Gun Control</button>
+            <button class="tablinks" onclick="openSection(event, 'DebugControl',false)">Debug</button>
         </div>
-
-
-
-        <div id="NavigationContent">
-            <fieldset>
-                <div class="columnLateral">
-                    <fieldset>
-                        Position X:<input id="joyPosizioneX" type="text" /><br />
-                        Position Y:<input id="joyPosizioneY" type="text" /><br />
-                        Direction:<input id="joyDirezione" type="text" /><br />
-                        X :<input id="joyX" type="text" /><br />
-                        Y :<input id="joyY" type="text" />
-                    </fieldset>
-                </div>
-                <div id="joyDiv"></div>
-                <div class="compass">
-                    <div class="arrow"></div>
-                    <div class="disc" id="compassDiscImg"></div>
-                </div>
-            </fieldset>
-        </div>
-
 
 
         <div id="NavigationControl" class="tabcontent1">
+            <div id="NavigationContent">
+                <fieldset>
+                    <div class="columnLateral">
+                        <fieldset>
+                            Position X:<input id="joyPosizioneX" type="text" /><br />
+                            Position Y:<input id="joyPosizioneY" type="text" /><br />
+                            Direction:<input id="joyDirezione" type="text" /><br />
+                            X :<input id="joyX" type="text" /><br />
+                            Y :<input id="joyY" type="text" />
+                        </fieldset>
+                    </div>
+                    <div id="joyDiv"></div>
+                    <div class="compass">
+                        <div class="arrow"></div>
+                        <div class="disc" id="compassDiscImg"></div>
+                    </div>
+                </fieldset>
+            </div>
         </div>
 
         <div id="GunControl" class="tabcontent1">
         </div>
 
-        <script type="text/javascript">
-            var ws;
-            var LastSendX, LastSendY;
-
-            // Create JoyStick object into the DIV 'joy2Div'
-            var joyParam = { "title": "joystick", "autoReturnToCenter": false, "internalFillColor": "#AA0000" };
-            var Joy = new JoyStick('joyDiv', joyParam);
-
-            var joyIinputPosX = document.getElementById("joyPosizioneX");
-            var joyInputPosY = document.getElementById("joyPosizioneY");
-            var joyDirezione = document.getElementById("joyDirezione");
-            var joyX = document.getElementById("joyX");
-            var joyY = document.getElementById("joyY");
-
-            setInterval(function () { joyIinputPosX.value = Joy.GetPosX(); }, 50);
-            setInterval(function () { joyInputPosY.value = Joy.GetPosY(); }, 50);
-            setInterval(function () { joyDirezione.value = Joy.GetDir(); }, 50);
-            setInterval(function () { joyX.value = Joy.GetX(); }, 50);
-            setInterval(function () { joyY.value = Joy.GetY(); }, 50);
-            setInterval(function () { SendJoystickData(joyX.value, joyY.value); }, 50);            
-        </script>
+        <div id="DebugControl" class="tabcontent1">
+            <div id="debugContent"></div>
+        </div>
 
 
-        <style>
-            h1 span {
-                font-size: 0.6em;
-            }
-
-            .types {
-                display: inline-block;
-                padding: 10px 30px;
-                border: 1px dotted;
-                margin-right: 20px;
-                overflow: hidden;
-            }
-
-            .container {
-                height: 180px;
-                width: 300px;
-            }
-
-                .container > div {
-                    float: left;
-                }
-
-            .control {
-                margin-right: 70px;
-            }
-            fieldset {
-                width: 500px;                
-            }
-            tabcontent {
-                border-width: 0;
-            }
-        </style>
     </div>
+    <script type="text/javascript">
+        var ws;
+        var LastSendX, LastSendY;
+
+        // Create JoyStick object into the DIV 'joy2Div'
+        var joyParam = { "title": "joystick", "autoReturnToCenter": false, "internalFillColor": "#AA0000" };
+        var Joy = new JoyStick('joyDiv', joyParam);
+
+        var joyIinputPosX = document.getElementById("joyPosizioneX");
+        var joyInputPosY = document.getElementById("joyPosizioneY");
+        var joyDirezione = document.getElementById("joyDirezione");
+        var joyX = document.getElementById("joyX");
+        var joyY = document.getElementById("joyY");
+
+        setInterval(function () { joyIinputPosX.value = Joy.GetPosX(); }, 50);
+        setInterval(function () { joyInputPosY.value = Joy.GetPosY(); }, 50);
+        setInterval(function () { joyDirezione.value = Joy.GetDir(); }, 50);
+        setInterval(function () { joyX.value = Joy.GetX(); }, 50);
+        setInterval(function () { joyY.value = Joy.GetY(); }, 50);
+        setInterval(function () { SendJoystickData(Joy.GetX(), Joy.GetY()); }, 50);
+    </script>
+
+
+    <style>
+        h1 span {
+            font-size: 0.6em;
+        }
+
+        .types {
+            display: inline-block;
+            padding: 10px 30px;
+            border: 1px dotted;
+            margin-right: 20px;
+            overflow: hidden;
+        }
+
+        .container {
+            height: 180px;
+            width: 300px;
+        }
+
+            .container > div {
+                float: left;
+            }
+
+        .control {
+            margin-right: 70px;
+        }
+
+        fieldset {
+            width: 500px;
+        }
+
+        tabcontent {
+            border-width: 0;
+        }
+    </style>
 </body>    
 </html>

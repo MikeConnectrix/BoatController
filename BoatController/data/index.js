@@ -16,11 +16,11 @@ function SetBoatName() {
 
 function SendJoystickData(joyX, joyY) {
     if (LastSendX != joyX) {
-        sendValue("Speed", joyX);
+        sendValue("0", joyX);
         LastSendX = joyX
     }
     if (LastSendY != joyY) {
-        sendValue("Bearing", joyY);
+        sendValue("1", joyY);
         LastSendY = joyY
     }
 }
@@ -48,8 +48,12 @@ function WebSocketBegin() {
                     compassDisc.style.MozTransform = `rotate(${myObj[key]}deg)`;
                 }
 
+                if (keys[i] == "debug") {
+                    var tae = document.getElementById("debugData");
+                    tae.value += myObj[key] + "\r\n";
+                    tae.scrollTop = 99999;
+                }
             }
-
         };
 
         ws.onclose = function () {
@@ -61,15 +65,22 @@ function WebSocketBegin() {
         alert("WebSocket NOT supported by your Browser!");
     }
 }
-function SetIndexFormDetails() {
-    document.getElementById("defaultOpen").click();
-}
 
 function SetFormDetails() {
+    $('#debugContent').load('debug.html');
     document.getElementById("defaultOpen").click();
 }
 
 function openSection(evt, sectionName, GetData) {
+    // Declare all variables
+    var i, tabcontent, tablinks;
+
+    // Get all elements with class="tabcontent" and hide them
+    tabcontent = document.getElementsByClassName("tabcontent1");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+
     // Get all elements with class="tablinks" and remove the class "active"
     tablinks = document.getElementsByClassName("tablinks");
     for (i = 0; i < tablinks.length; i++) {

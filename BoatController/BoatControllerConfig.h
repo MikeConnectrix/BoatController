@@ -17,6 +17,8 @@ public:
 	void readConfig();
 	void saveConfig();
 	void saveConfigToFile(String fileName);
+	void saveConfigToSDFile(String fileName);
+	void restoreConfigFromSDFile(String fileName);
 	void backupConfig();
 	JsonVariant getElement(String ElementName);
 

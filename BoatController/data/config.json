@@ -1,7 +1,7 @@
 {
   "Params": {
     "boat": "Prinz Eugen",
-    "RCType": "3",
+    "RCType": "2",
     "STAMode": "true",
     "STAName": "Connectrix",
     "STAPwd": "Mungus123",
@@ -10,13 +10,13 @@
     "SShowDel": "50"
   },
   "Comp": {
-    "Offset": 0,
-    "MMinX": -93,
-    "MMaxX": 54,
-    "MMinY": -35,
-    "MMaxY": 74,
-    "MMinZ": -89,
-    "MMaxZ": 59
+    "Offset": "0",
+    "MMinX": -123,
+    "MMaxX": 15,
+    "MMinY": -37,
+    "MMaxY": 88,
+    "MMinZ": -166,
+    "MMaxZ": 45
   },
   "Cont": [
     {
@@ -30,12 +30,48 @@
       "ID": "1"
     }
   ],
+  "Channels": [
+    {
+      "channel": "0",
+      "servo": "0",
+      "condition": "0",
+      "min": "-100",
+      "max": "100",
+      "iMax": 50683,
+      "iMin": 49681,
+      "cMax": 1793,
+      "cMin": 191
+    },
+    {
+      "channel": "1",
+      "servo": "1",
+      "condition": "1",
+      "min": "-100",
+      "max": "100",
+      "iMax": 55249,
+      "iMin": 54247,
+      "cMax": 1793,
+      "cMin": 191
+    },
+    {
+      "channel": "2",
+      "servo": "2",
+      "condition": "2",
+      "min": "-100",
+      "max": "100",
+      "iMax": 22481,
+      "iMin": 21479,
+      "cMax": 1793,
+      "cMin": 191
+    }
+  ],
   "SType": [
     {
       "dscn": "180 Degree Servo",
       "min": "0",
       "max": "180",
-      "spd": "5",
+      "spd": "1",
+      "step": "10",
       "homPos": "90",
       "batPos": "90",
       "ID": "0"
@@ -44,7 +80,8 @@
       "dscn": "270 Degree Servo",
       "min": "0",
       "max": "270",
-      "spd": "5",
+      "spd": "1",
+      "step": "1",
       "homPos": "135",
       "batPos": "135",
       "ID": "1"
@@ -54,10 +91,96 @@
       "min": "-100",
       "max": "100",
       "spd": "0",
+      "step": "1",
       "homPos": "0",
       "batPos": "0",
       "ID": "2"
     }
   ],
-  "Servo": []
+  "Servo": [
+    {
+      "dscn": "Throttle",
+      "Ctrl": "0",
+      "Prt": "0",
+      "type": "0",
+      "cc": "",
+      "rev": "true",
+      "abs": "true",
+      "track": "false",
+      "center": "0",
+      "spd": "0",
+      "step": "",
+      "ID": "0"
+    },
+    {
+      "dscn": "Rudder",
+      "Ctrl": "0",
+      "Prt": "1",
+      "type": "1",
+      "cc": "",
+      "rev": "false",
+      "abs": "true",
+      "track": "false",
+      "center": "0",
+      "spd": "0",
+      "step": "",
+      "ID": "1"
+    },
+    {
+      "dscn": "Range Finder",
+      "Ctrl": "0",
+      "Prt": "10",
+      "type": "1",
+      "cc": "",
+      "rev": "true",
+      "abs": "true",
+      "track": "true",
+      "center": "0",
+      "spd": "5",
+      "step": "5",
+      "ID": "2"
+    },
+    {
+      "dscn": "Turret A",
+      "Ctrl": "0",
+      "Prt": "11",
+      "type": "1",
+      "cc": "2",
+      "rev": "false",
+      "abs": "false",
+      "track": "false",
+      "center": "0",
+      "spd": "100",
+      "step": "",
+      "ID": "3"
+    },
+    {
+      "dscn": "Turret B",
+      "Ctrl": "0",
+      "Prt": "12",
+      "type": "1",
+      "cc": "2",
+      "rev": "false",
+      "abs": "false",
+      "track": "false",
+      "center": "0",
+      "spd": "100",
+      "step": "",
+      "ID": "4"
+    },
+    {
+      "dscn": "Turret C",
+      "Ctrl": "0",
+      "Prt": "13",
+      "type": "1",
+      "cc": "2",
+      "rev": "false",
+      "abs": "false",
+      "track": "false",
+      "center": "180",
+      "spd": "100",
+      "step": "",
+      "ID": "5"
+    }
+  ]
 }
